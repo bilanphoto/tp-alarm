@@ -654,7 +654,7 @@
 
         .alarm-title-left h2 {
             color: #2c3e50;
-            font-size: 63px;
+            font-size: 50px;
             margin: 0;
             font-weight: bold;
         }
@@ -663,14 +663,22 @@
         .controls-row {
             display: flex;
             align-items: center;
-            gap: 30px;
+            gap: 20px;
             padding: 5px 20px 10px 20px;
+            flex-wrap: wrap;
         }
 
         .top-alarm-item {
             display: flex;
             align-items: center;
             gap: 10px;
+        }
+
+        .top-alarm-item label {
+            font-weight: bold;
+            font-size: 18px;
+            color: #2c3e50;
+            white-space: nowrap;
         }
 
         .top-alarm-item label {
@@ -706,7 +714,7 @@
             padding: 10px 25px;
             background: #ffffff;
             display: flex;
-            gap: 40px;
+            gap: 10px;
             align-items: center;
         }
 
@@ -793,22 +801,39 @@
 
         .top-alarm-input {
             padding: 8px 15px;
-            border: 2px solid #3498db;
+            border: none;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 24px;
             font-weight: bold;
-            width: 200px;
+            width: 250px;
             transition: all 0.3s ease;
+            background: #e74c3c;
+            color: white;
+            text-align: center;
+        }
+
+        .top-alarm-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
         }
 
         .top-alarm-input:hover {
-            border-color: #2980b9;
+            background: #c0392b;
         }
 
         .top-alarm-input:focus {
             outline: none;
-            border-color: #2980b9;
+            background: #c0392b;
             box-shadow: 0 0 10px rgba(52, 152, 219, 0.3);
+        }
+
+        /* Second alarm - Orange background */
+        #topAlarmInput2 {
+            background: #ff9800;
+        }
+
+        #topAlarmInput2:hover,
+        #topAlarmInput2:focus {
+            background: #f57c00;
         }
 
         /* GSP1 and Date Row */
@@ -835,7 +860,7 @@
 
         .gsp-select {
             padding: 8px 15px;
-            border: none;
+            border: 2px solid #3498db;
             border-radius: 8px;
             font-size: 18px;
             font-weight: bold;
@@ -870,7 +895,7 @@
 
         .date-input {
             padding: 8px 15px;
-            border: none;
+            border: 2px solid #3498db;
             border-radius: 8px;
             font-size: 18px;
             font-weight: bold;
@@ -1196,8 +1221,13 @@
             </div>
 
             <div class="top-alarm-item">
-                <label for="topAlarmInput">Top alarm :</label>
-                <input type="text" id="topAlarmInput" class="top-alarm-input" placeholder="Enter top alarm">
+                <label for="topAlarmInput1">Top alarm1 :</label>
+                <input type="text" id="topAlarmInput1" class="top-alarm-input" placeholder="Enter top alarm">
+            </div>
+
+            <div class="top-alarm-item">
+                <label for="topAlarmInput2">Second alarm :</label>
+                <input type="text" id="topAlarmInput2" class="top-alarm-input" placeholder="Enter top alarm">
             </div>
         </div>
 
