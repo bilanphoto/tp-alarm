@@ -73,7 +73,7 @@
             padding: 20px;
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             box-shadow: none;
-            height: 540px;
+            height: 700px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -2052,12 +2052,12 @@
             if (!canvas) return;
             
             const ctx = canvas.getContext('2d');
-            const width = canvas.width = 300;
-            const height = canvas.height = 180;
+            const width = canvas.width = 400;
+            const height = canvas.height = 250;
             
             const centerX = width / 2;
-            const centerY = height - 20;
-            const radius = 95;
+            const centerY = height - 25;
+            const radius = 130;
             
             // Clear canvas
             ctx.clearRect(0, 0, width, height);
@@ -2082,7 +2082,7 @@
                 
                 ctx.beginPath();
                 ctx.arc(centerX, centerY, radius, previousAngle, segmentAngle);
-                ctx.lineWidth = 22;
+                ctx.lineWidth = 30;
                 ctx.strokeStyle = segment.color;
                 ctx.stroke();
                 
@@ -2099,14 +2099,14 @@
             // เข็ม
             ctx.beginPath();
             ctx.moveTo(0, 0);
-            ctx.lineTo(radius - 10, 0);
-            ctx.lineWidth = 4;
+            ctx.lineTo(radius - 14, 0);
+            ctx.lineWidth = 5;
             ctx.strokeStyle = '#34495e';
             ctx.stroke();
             
             // จุดกลาง
             ctx.beginPath();
-            ctx.arc(0, 0, 9, 0, 2 * Math.PI);
+            ctx.arc(0, 0, 12, 0, 2 * Math.PI);
             ctx.fillStyle = '#34495e';
             ctx.fill();
             
@@ -2114,15 +2114,15 @@
             
             // วาดตัวเลข
             ctx.fillStyle = '#7f8c8d';
-            ctx.font = 'bold 13px Sarabun, Tahoma, sans-serif';
+            ctx.font = 'bold 18px Sarabun, Tahoma, sans-serif';
             ctx.textAlign = 'center';
             
             // 0, 20, 40, 60, 80, 100
             const labels = [0, 20, 40, 60, 80, 100];
             labels.forEach(value => {
                 const angle = startAngle + (endAngle - startAngle) * (value / 100);
-                const x = centerX + Math.cos(angle) * (radius + 22);
-                const y = centerY + Math.sin(angle) * (radius + 22);
+                const x = centerX + Math.cos(angle) * (radius + 30);
+                const y = centerY + Math.sin(angle) * (radius + 30);
                 ctx.fillText(value.toString(), x, y + 3);
             });
         }
