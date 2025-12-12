@@ -654,7 +654,7 @@
 
         .alarm-title-left h2 {
             color: #2c3e50;
-            font-size: 42px;
+            font-size: 63px;
             margin: 0;
             font-weight: bold;
         }
@@ -712,10 +712,15 @@
 
         .alarm-item {
             flex: 1;
-            display: flex;
-            flex-direction: row;
-            align-items: baseline;
-            gap: 8px;
+            display: table;
+            width: 100%;
+        }
+
+        .alarm-item label,
+        .alarm-item input,
+        .alarm-item span {
+            display: table-cell;
+            vertical-align: middle;
         }
 
         .alarm-item label {
@@ -725,13 +730,14 @@
             white-space: nowrap;
             margin: 0;
             padding: 0;
-            line-height: 42px;
+            padding-right: 10px;
         }
 
         .alarm-value {
             padding: 0;
             margin: 0;
             border: none;
+            outline: none;
             border-radius: 8px;
             font-size: 42px;
             font-weight: bold;
@@ -741,18 +747,17 @@
             max-width: 150px;
             min-width: 60px;
             text-align: center;
-            -webkit-appearance: none;
-            -moz-appearance: textfield;
-            appearance: none;
-            box-sizing: border-box;
-            line-height: 42px;
+            display: inline-block;
         }
         
-        /* Remove number input arrows */
-        .alarm-value::-webkit-outer-spin-button,
-        .alarm-value::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
+        .alarm-value:empty:before {
+            content: "0";
+            color: #e74c3c;
+        }
+        
+        .alarm-value:focus {
+            outline: none;
+            background: rgba(231, 76, 60, 0.05);
         }
 
         .alarm-value:focus {
@@ -765,10 +770,8 @@
             font-size: 42px;
             font-weight: bold;
             color: #e74c3c;
-            display: inline-block;
             min-width: 100px;
             text-align: center;
-            line-height: 42px;
         }
 
         /* Top Alarm Input Row */
@@ -1167,7 +1170,7 @@
             <div class="alarm-box-combined">
                 <div class="alarm-item">
                     <label>Total alarm / day :</label>
-                    <input type="text" id="totalAlarmSingle" class="alarm-value" placeholder="0" value="0">
+                    <div contenteditable="true" id="totalAlarmSingle" class="alarm-value">0</div>
                 </div>
                 
                 <div class="alarm-item">
@@ -2010,7 +2013,7 @@
 
         // ฟังก์ชันปรับขนาด input ตามจำนวนตัวเลข
         function adjustInputWidth(input) {
-            const value = input.value || '0';
+            const value = input.textContent || '0';
             const length = value.length;
             // คำนวณความกว้างตามจำนวนตัวอักษร (ประมาณ 30px ต่อตัว)
             const width = Math.max(60, Math.min(150, length * 30 + 30));
@@ -2022,20 +2025,37 @@
 
         alarmInput.addEventListener('input', function() {
             // Allow only numbers and decimal point
-            this.value = this.value.replace(/[^0-9.]/g, '');
+            let text = this.textContent.replace(/[^0-9.]/g, '');
             // Prevent multiple decimal points
-            const parts = this.value.split('.');
+            const parts = text.split('.');
             if (parts.length > 2) {
-                this.value = parts[0] + '.' + parts.slice(1).join('');
+                text = parts[0] + '.' + parts.slice(1).join('');
+            }
+            
+            // Update content if changed
+            if (this.textContent !== text) {
+                const selection = window.getSelection();
+                const range = selection.getRangeAt(0);
+                const offset = range.startOffset;
+                
+                this.textContent = text;
+                
+                // Restore cursor position
+                if (this.firstChild) {
+                    range.setStart(this.firstChild, Math.min(offset, text.length));
+                    range.collapse(true);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                }
             }
             
             adjustInputWidth(this);
-            const value = parseFloat(this.value) || 0;
+            const value = parseFloat(this.textContent) || 0;
             alarmResult.textContent = calculateAlarmRate(value);
         });
 
         // คำนวณครั้งแรก
-        const initialValue = parseFloat(alarmInput.value) || 0;
+        const initialValue = parseFloat(alarmInput.textContent) || 0;
         alarmResult.textContent = calculateAlarmRate(initialValue);
 
         // ตั้งค่าวันที่เป็นวันปัจจุบัน
