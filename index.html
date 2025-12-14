@@ -1535,6 +1535,21 @@
                     .browser-chrome .gauge-container {
                         max-height: 470px !important;
                     }
+                    
+                    /* Chrome prefers larger fonts */
+                    .browser-chrome .alarm-item label {
+                        font-size: 18px !important;
+                        padding-right: 10px !important;
+                    }
+                    
+                    .browser-chrome .alarm-value,
+                    .browser-chrome .alarm-value-result {
+                        font-size: 36px !important;
+                    }
+                    
+                    .browser-chrome .alarm-box-combined {
+                        padding: 10px 25px !important;
+                    }
                 `;
             } else if (browserType === 'safari') {
                 browserCSS = `
