@@ -30,11 +30,16 @@
         .container {
             background: white;
             border-radius: 20px;
-            padding: 30px;
+            padding: 25px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             max-width: 1800px;
             width: 98%;
             aspect-ratio: 16 / 9;
+            height: auto;
+            max-height: calc(98vw * 9 / 16);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
         .header {
@@ -70,10 +75,10 @@
             cursor: pointer;
             transition: all 0.3s ease;
             border-radius: 15px;
-            padding: 20px;
+            padding: 15px;
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             box-shadow: none;
-            height: 700px;
+            height: 505px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -549,7 +554,8 @@
             grid-template-rows: 1fr 1fr;
             gap: 8px;
             margin-top: 8px;
-            max-height: 700px;
+            flex: 1;
+            min-height: 0;
         }
 
         .gauge-card {
@@ -563,7 +569,7 @@
             justify-content: center;
             transition: all 0.3s ease;
             cursor: pointer;
-            height: 340px;
+            min-height: 0;
             overflow: hidden;
         }
 
@@ -646,6 +652,7 @@
             align-items: center;
             justify-content: space-between;
             padding: 15px 20px 10px 20px;
+            flex-shrink: 0;
         }
 
         .alarm-title-left {
@@ -666,6 +673,7 @@
             gap: 20px;
             padding: 5px 20px 10px 20px;
             flex-wrap: wrap;
+            flex-shrink: 0;
         }
 
         .top-alarm-item {
@@ -919,15 +927,17 @@
         .alarm-legend-bar {
             display: flex;
             width: 100%;
-            margin-top: 15px;
+            margin-top: auto;
+            margin-bottom: 8px;
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
         }
 
         .legend-item {
             flex: 1;
-            padding: 12px 10px;
+            padding: 10px 8px;
             text-align: center;
             display: flex;
             flex-direction: column;
@@ -2102,12 +2112,12 @@
             if (!canvas) return;
             
             const ctx = canvas.getContext('2d');
-            const width = canvas.width = 400;
-            const height = canvas.height = 250;
+            const width = canvas.width = 350;
+            const height = canvas.height = 220;
             
             const centerX = width / 2;
-            const centerY = height - 25;
-            const radius = 130;
+            const centerY = height - 22;
+            const radius = 115;
             
             // Clear canvas
             ctx.clearRect(0, 0, width, height);
@@ -2132,7 +2142,7 @@
                 
                 ctx.beginPath();
                 ctx.arc(centerX, centerY, radius, previousAngle, segmentAngle);
-                ctx.lineWidth = 30;
+                ctx.lineWidth = 26;
                 ctx.strokeStyle = segment.color;
                 ctx.stroke();
                 
@@ -2149,14 +2159,14 @@
             // เข็ม
             ctx.beginPath();
             ctx.moveTo(0, 0);
-            ctx.lineTo(radius - 14, 0);
-            ctx.lineWidth = 5;
+            ctx.lineTo(radius - 12, 0);
+            ctx.lineWidth = 4;
             ctx.strokeStyle = '#34495e';
             ctx.stroke();
             
             // จุดกลาง
             ctx.beginPath();
-            ctx.arc(0, 0, 12, 0, 2 * Math.PI);
+            ctx.arc(0, 0, 10, 0, 2 * Math.PI);
             ctx.fillStyle = '#34495e';
             ctx.fill();
             
@@ -2164,15 +2174,15 @@
             
             // วาดตัวเลข
             ctx.fillStyle = '#7f8c8d';
-            ctx.font = 'bold 18px Sarabun, Tahoma, sans-serif';
+            ctx.font = 'bold 16px Sarabun, Tahoma, sans-serif';
             ctx.textAlign = 'center';
             
             // 0, 20, 40, 60, 80, 100
             const labels = [0, 20, 40, 60, 80, 100];
             labels.forEach(value => {
                 const angle = startAngle + (endAngle - startAngle) * (value / 100);
-                const x = centerX + Math.cos(angle) * (radius + 30);
-                const y = centerY + Math.sin(angle) * (radius + 30);
+                const x = centerX + Math.cos(angle) * (radius + 26);
+                const y = centerY + Math.sin(angle) * (radius + 26);
                 ctx.fillText(value.toString(), x, y + 3);
             });
         }
