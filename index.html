@@ -1532,11 +1532,12 @@
                 `;
             } else if (browserType === 'chrome') {
                 browserCSS = `
+                    /* Container 1 - Water Monitoring */
                     .browser-chrome .gauge-container {
-                        max-height: 470px !important;
+                        max-height: 520px !important;
                     }
                     
-                    /* Chrome prefers larger fonts */
+                    /* Container 2 - Alarm Management */
                     .browser-chrome .alarm-item label {
                         font-size: 18px !important;
                         padding-right: 10px !important;
