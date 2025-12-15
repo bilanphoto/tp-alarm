@@ -1527,10 +1527,10 @@
             if (browserType === 'edge') {
                 browserCSS = `
                     .browser-edge .gauge-container {
-                        height: 900px !important;
-                        min-height: 900px !important;
-                        max-height: 900px !important;
-                        flex: 0 0 900px !important;
+                        height: 700px !important;
+                        min-height: 700px !important;
+                        max-height: 700px !important;
+                        flex: 0 0 700px !important;
                     }
                     
                     /* Responsive container width for Edge only */
@@ -1559,7 +1559,7 @@
                 browserCSS = `
                     /* Container 1 - Water Monitoring */
                     .browser-chrome .gauge-container {
-                        /* Use flex: 1 from main CSS - natural height */
+                        max-height: 520px !important;
                     }
                     
                     /* Container 2 - Alarm Management */
