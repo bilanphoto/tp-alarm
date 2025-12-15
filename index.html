@@ -84,7 +84,7 @@
             flex-direction: column;
             justify-content: center;
             min-height: 0;
-            max-height: 400px;
+            /* max-height removed - controlled by browser-specific CSS */
         }
 
         .gauge-container:hover {
@@ -1527,7 +1527,10 @@
             if (browserType === 'edge') {
                 browserCSS = `
                     .browser-edge .gauge-container {
-                        max-height: 430px !important;
+                        height: 1300px !important;
+                        min-height: 1300px !important;
+                        max-height: 1300px !important;
+                        flex: 0 0 1300px !important;
                     }
                     
                     /* Responsive container width for Edge only */
@@ -1556,7 +1559,8 @@
                 browserCSS = `
                     /* Container 1 - Water Monitoring */
                     .browser-chrome .gauge-container {
-                        max-height: 520px !important;
+                        height: 520px !important;
+                        max-height: none !important;
                     }
                     
                     /* Container 2 - Alarm Management */
@@ -1599,7 +1603,8 @@
             } else if (browserType === 'safari') {
                 browserCSS = `
                     .browser-safari .gauge-container {
-                        max-height: 390px !important;
+                        height: 390px !important;
+                        max-height: none !important;
                     }
                     
                     /* Responsive container width for Safari */
@@ -1627,7 +1632,8 @@
             } else if (browserType === 'firefox') {
                 browserCSS = `
                     .browser-firefox .gauge-container {
-                        max-height: 395px !important;
+                        height: 395px !important;
+                        max-height: none !important;
                     }
                     
                     /* Responsive container width for Firefox */
