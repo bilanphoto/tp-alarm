@@ -1529,6 +1529,28 @@
                     .browser-edge .gauge-container {
                         max-height: 430px !important;
                     }
+                    
+                    /* Responsive container width for Edge only */
+                    @media screen and (min-width: 2560px) {
+                        .browser-edge .container {
+                            width: 90vw !important;
+                            max-width: 90vw !important;
+                        }
+                    }
+                    
+                    @media screen and (min-width: 1920px) and (max-width: 2559px) {
+                        .browser-edge .container {
+                            width: 92vw !important;
+                            max-width: 92vw !important;
+                        }
+                    }
+                    
+                    @media screen and (min-width: 1366px) and (max-width: 1919px) {
+                        .browser-edge .container {
+                            width: 95vw !important;
+                            max-width: 95vw !important;
+                        }
+                    }
                 `;
             } else if (browserType === 'chrome') {
                 browserCSS = `
@@ -1551,17 +1573,83 @@
                     .browser-chrome .alarm-box-combined {
                         padding: 10px 25px !important;
                     }
+                    
+                    /* Responsive container width for Chrome */
+                    @media screen and (min-width: 2560px) {
+                        .browser-chrome .container {
+                            width: 90vw !important;
+                            max-width: 90vw !important;
+                        }
+                    }
+                    
+                    @media screen and (min-width: 1920px) and (max-width: 2559px) {
+                        .browser-chrome .container {
+                            width: 92vw !important;
+                            max-width: 92vw !important;
+                        }
+                    }
+                    
+                    @media screen and (min-width: 1366px) and (max-width: 1919px) {
+                        .browser-chrome .container {
+                            width: 95vw !important;
+                            max-width: 95vw !important;
+                        }
+                    }
                 `;
             } else if (browserType === 'safari') {
                 browserCSS = `
                     .browser-safari .gauge-container {
                         max-height: 390px !important;
                     }
+                    
+                    /* Responsive container width for Safari */
+                    @media screen and (min-width: 2560px) {
+                        .browser-safari .container {
+                            width: 90vw !important;
+                            max-width: 90vw !important;
+                        }
+                    }
+                    
+                    @media screen and (min-width: 1920px) and (max-width: 2559px) {
+                        .browser-safari .container {
+                            width: 92vw !important;
+                            max-width: 92vw !important;
+                        }
+                    }
+                    
+                    @media screen and (min-width: 1366px) and (max-width: 1919px) {
+                        .browser-safari .container {
+                            width: 95vw !important;
+                            max-width: 95vw !important;
+                        }
+                    }
                 `;
             } else if (browserType === 'firefox') {
                 browserCSS = `
                     .browser-firefox .gauge-container {
                         max-height: 395px !important;
+                    }
+                    
+                    /* Responsive container width for Firefox */
+                    @media screen and (min-width: 2560px) {
+                        .browser-firefox .container {
+                            width: 90vw !important;
+                            max-width: 90vw !important;
+                        }
+                    }
+                    
+                    @media screen and (min-width: 1920px) and (max-width: 2559px) {
+                        .browser-firefox .container {
+                            width: 92vw !important;
+                            max-width: 92vw !important;
+                        }
+                    }
+                    
+                    @media screen and (min-width: 1366px) and (max-width: 1919px) {
+                        .browser-firefox .container {
+                            width: 95vw !important;
+                            max-width: 95vw !important;
+                        }
                     }
                 `;
             }
