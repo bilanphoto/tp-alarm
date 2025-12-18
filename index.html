@@ -515,13 +515,14 @@
             font-weight: bold;
             color: #2c3e50;
             white-space: nowrap;
+            font-size: 32px;
         }
 
         .water-volume-input input {
             padding: 10px;
             border: 2px solid #3498db;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 32px;
             font-weight: bold;
             text-align: center;
             transition: all 0.3s ease;
@@ -532,6 +533,27 @@
             outline: none;
             border-color: #2ecc71;
             box-shadow: 0 0 10px rgba(46, 204, 113, 0.3);
+        }
+
+        /* Color classes for percentage ranges - text color only */
+        .water-volume-input input.range-yellow {
+            color: #f9a825;
+        }
+
+        .water-volume-input input.range-green {
+            color: #2e7d32;
+        }
+
+        .water-volume-input input.range-blue {
+            color: #1565c0;
+        }
+
+        .water-volume-input input.range-pink {
+            color: #c2185b;
+        }
+
+        .water-volume-input input.range-red {
+            color: #c62828;
         }
 
         /* Grid Layout for 2 columns - Equal width 1:1 */
@@ -822,7 +844,9 @@
             border-radius: 8px;
             font-size: 24px;
             font-weight: bold;
-            width: 250px;
+            min-width: 100px;
+            max-width: 500px;
+            width: auto;
             transition: all 0.3s ease;
             background: #e74c3c;
             color: white;
@@ -2760,6 +2784,104 @@
                 }, 2000);
             }
         });
+
+        // Auto-resize top alarm inputs based on content
+        function autoResizeInput(input) {
+            const minWidth = 100;
+            const maxWidth = 500;
+            
+            // Create a temporary span to measure text width
+            const tempSpan = document.createElement('span');
+            tempSpan.style.visibility = 'hidden';
+            tempSpan.style.position = 'absolute';
+            tempSpan.style.fontSize = window.getComputedStyle(input).fontSize;
+            tempSpan.style.fontWeight = window.getComputedStyle(input).fontWeight;
+            tempSpan.style.fontFamily = window.getComputedStyle(input).fontFamily;
+            tempSpan.style.padding = window.getComputedStyle(input).padding;
+            tempSpan.textContent = input.value || input.placeholder || '';
+            
+            document.body.appendChild(tempSpan);
+            const textWidth = tempSpan.offsetWidth + 30; // Add padding
+            document.body.removeChild(tempSpan);
+            
+            // Set width with min/max constraints
+            input.style.width = Math.min(Math.max(textWidth, minWidth), maxWidth) + 'px';
+        }
+
+        // Apply auto-resize to top alarm inputs
+        const topAlarmInput1 = document.getElementById('topAlarmInput1');
+        const topAlarmInput2 = document.getElementById('topAlarmInput2');
+        
+        if (topAlarmInput1) {
+            topAlarmInput1.addEventListener('input', function() {
+                autoResizeInput(this);
+            });
+            // Initialize on load
+            autoResizeInput(topAlarmInput1);
+        }
+        
+        if (topAlarmInput2) {
+            topAlarmInput2.addEventListener('input', function() {
+                autoResizeInput(this);
+            });
+            // Initialize on load
+            autoResizeInput(topAlarmInput2);
+        }
+
+        // Function to extract percentage from input value
+        function extractPercentage(value) {
+            // Try to extract percentage from formats like "150.97 (100.48%)" or just "100.48%"
+            const percentMatch = value.match(/\(?\s*(\d+(?:\.\d+)?)\s*%\s*\)?/);
+            if (percentMatch) {
+                return parseFloat(percentMatch[1]);
+            }
+            return null;
+        }
+
+        // Function to apply color based on percentage
+        function applyPercentageColor(input) {
+            const value = input.value.trim();
+            const percentage = extractPercentage(value);
+            
+            // Remove all color classes first
+            input.classList.remove('range-yellow', 'range-green', 'range-blue', 'range-pink', 'range-red');
+            
+            if (percentage !== null) {
+                if (percentage >= 0 && percentage <= 30) {
+                    input.classList.add('range-yellow');
+                } else if (percentage >= 31 && percentage <= 50) {
+                    input.classList.add('range-green');
+                } else if (percentage >= 51 && percentage <= 80) {
+                    input.classList.add('range-blue');
+                } else if (percentage >= 81 && percentage <= 100) {
+                    input.classList.add('range-pink');
+                } else if (percentage > 100) {
+                    input.classList.add('range-red');
+                }
+            }
+        }
+
+        // Apply color change to water volume inputs
+        const waterVolumeLeft = document.getElementById('waterVolumeLeft');
+        const waterVolume = document.getElementById('waterVolume');
+        
+        if (waterVolumeLeft) {
+            // Apply color when user clicks away (blur event)
+            waterVolumeLeft.addEventListener('blur', function() {
+                applyPercentageColor(this);
+            });
+            // Initialize on load
+            applyPercentageColor(waterVolumeLeft);
+        }
+        
+        if (waterVolume) {
+            // Apply color when user clicks away (blur event)
+            waterVolume.addEventListener('blur', function() {
+                applyPercentageColor(this);
+            });
+            // Initialize on load
+            applyPercentageColor(waterVolume);
+        }
     </script>
 
     <!-- html2canvas Library -->
