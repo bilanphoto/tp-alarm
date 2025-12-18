@@ -1262,7 +1262,7 @@
     </div>
 
     <!-- Second Container -->
-    <div class="container" id="container2">
+    <div class="container" id="container2" style="margin-top: 30px;">
         <!-- Row 1: Alarm Management (left) + Green Box (right) -->
         <div class="alarm-header-row">
             <div class="alarm-title-left">
@@ -1363,203 +1363,6 @@
     <div style="text-align: center; margin-top: 15px; padding-bottom: 10px;">
         <button id="saveBtn2" class="save-btn">
             💾 Save Dashboard
-        </button>
-    </div>
-
-    <!-- Third Container (Copy of Container 2 for customization) -->
-    <div class="container" id="container3">
-        <!-- Row 1: Alarm Management (left) + Green Box (right) -->
-        <div class="alarm-header-row">
-            <div class="alarm-title-left">
-                <h2>Alarm Management</h2>
-            </div>
-
-            <div class="alarm-box-combined">
-                <div class="alarm-item">
-                    <label>Total alarm / day :</label>
-                    <div contenteditable="true" id="totalAlarmSingle3" class="alarm-value">0</div>
-                </div>
-                
-                <div class="alarm-item">
-                    <label>Alarm/H/Panel operator(2) :</label>
-                    <span class="alarm-value-result" id="resultSingle3">0.00</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Row 2: Plant + Date + Top Alarm (all in one row) -->
-        <div class="controls-row">
-            <div class="gsp-item">
-                <label for="gsp1Select3">Plant :</label>
-                <select id="gsp1Select3" class="gsp-select">
-                    <option value="GSP 2">GSP 2</option>
-                    <option value="GSP 3">GSP 3</option>
-                    <option value="GSP 5">GSP 5</option>
-                    <option value="GSP 6">GSP 6</option>
-                    <option value="ESP">ESP</option>
-                    <option value="GPPP">GPPP</option>
-                </select>
-            </div>
-            
-            <div class="date-item">
-                <label for="dateInput3">วันที่</label>
-                <input type="date" id="dateInput3" class="date-input">
-            </div>
-
-            <div class="top-alarm-item">
-                <label for="topAlarmInput3">Top alarm :</label>
-                <input type="text" id="topAlarmInput3" class="top-alarm-input" placeholder="Enter top alarm">
-            </div>
-        </div>
-
-        <!-- Gauge Grid 2x2 -->
-        <div class="gauge-grid-2x2">
-            <div class="gauge-card" id="gaugeCard5">
-                <h3 class="gauge-title">Card 1</h3>
-                <div class="gauge-subtitle">คลิกเพื่อเพิ่มรูปภาพ</div>
-            </div>
-
-            <div class="gauge-card" id="gaugeCard6" style="padding: 10px; background: #ffffff; cursor: pointer;">
-                <!-- Operating Window Alarms Card -->
-                <div style="width: 100%; height: 100%; display: flex; flex-direction: column; font-family: Arial, sans-serif;">
-                    <!-- Header -->
-                    <div style="display: flex; justify-content: flex-end; margin-bottom: 5px;">
-                        <div style="background: #f5a623; color: #333; padding: 5px 15px; font-weight: bold; font-size: 12px; border-radius: 3px;">
-                            Operating Window Alarms
-                        </div>
-                    </div>
-                    
-                    <!-- Alarm/Day Badge -->
-                    <div style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
-                        <div style="background: #4cd964; color: #333; padding: 5px 15px; font-weight: bold; font-size: 14px; border-radius: 3px;">
-                            <span contenteditable="true" id="owAlarmCount3">0</span> Alarm/Day
-                        </div>
-                    </div>
-                    
-                    <!-- Title -->
-                    <div style="text-align: center; margin-bottom: 5px;">
-                        <div style="font-size: 14px; font-weight: bold; color: #333;">Alarm by Condition</div>
-                        <div style="font-size: 11px; color: #666; font-style: italic;">Filter Options</div>
-                    </div>
-                    
-                    <!-- Table -->
-                    <div style="flex: 1; overflow: auto;">
-                        <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
-                            <tr>
-                                <td style="border: 1px solid #ccc; padding: 4px 8px; background: #f5f5f5; font-weight: bold; width: 35%;">Plant</td>
-                                <td contenteditable="true" style="border: 1px solid #ccc; padding: 4px 8px; background: #fff;">OW ESP</td>
-                            </tr>
-                            <tr>
-                                <td style="border: 1px solid #ccc; padding: 4px 8px; background: #f5f5f5; font-weight: bold;">Condition</td>
-                                <td contenteditable="true" style="border: 1px solid #ccc; padding: 4px 8px; background: #fff;">All</td>
-                            </tr>
-                            <tr>
-                                <td style="border: 1px solid #ccc; padding: 4px 8px; background: #f5f5f5; font-weight: bold;">Suppression</td>
-                                <td contenteditable="true" style="border: 1px solid #ccc; padding: 4px 8px; background: #fff;">All Unsuppressed Alarms</td>
-                            </tr>
-                            <tr>
-                                <td style="border: 1px solid #ccc; padding: 4px 8px; background: #f5f5f5; font-weight: bold;">Source Type</td>
-                                <td contenteditable="true" style="border: 1px solid #ccc; padding: 4px 8px; background: #fff;">All</td>
-                            </tr>
-                            <tr>
-                                <td style="border: 1px solid #ccc; padding: 4px 8px; background: #f5f5f5; font-weight: bold;">Category Type</td>
-                                <td contenteditable="true" style="border: 1px solid #ccc; padding: 4px 8px; background: #fff;">All</td>
-                            </tr>
-                        </table>
-                    </div>
-                    
-                    <!-- Footer -->
-                    <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 9px; color: #666; font-style: italic;">
-                        <span>Yokogawa Exaquantum/ARA</span>
-                        <span>Page 2 of 2</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="gauge-card" id="gaugeCard7">
-                <h3 class="gauge-title">Card 3</h3>
-                <div class="gauge-subtitle">คลิกเพื่อเพิ่มรูปภาพ</div>
-            </div>
-
-            <div class="gauge-card" id="gaugeCard8" style="padding: 0; overflow: hidden;">
-                <table style="width: 100%; height: 100%; border-collapse: collapse; font-size: 12px;">
-                    <tr style="background: linear-gradient(135deg, #00d4ff 0%, #00f2fe 100%);">
-                        <th style="border: 2px solid #2c3e50; padding: 8px; color: white; font-weight: bold; width: 25%;">Tag</th>
-                        <th style="border: 2px solid #2c3e50; padding: 8px; color: white; font-weight: bold; width: 25%;">Alarm</th>
-                        <th style="border: 2px solid #2c3e50; padding: 8px; color: white; font-weight: bold; width: 25%;">Quantity</th>
-                        <th style="border: 2px solid #2c3e50; padding: 8px; color: white; font-weight: bold; width: 25%;">Corrective</th>
-                    </tr>
-                    <tr>
-                        <td rowspan="3" style="border: 2px solid #2c3e50; padding: 8px; background: #f39c12; text-align: center; font-weight: bold; color: white; font-size: 14px;">IOW</td>
-                        <td contenteditable="true" style="border: 2px solid #2c3e50; padding: 8px; background: #ecf0f1;"></td>
-                        <td contenteditable="true" style="border: 2px solid #2c3e50; padding: 8px; background: #ecf0f1;"></td>
-                        <td contenteditable="true" style="border: 2px solid #2c3e50; padding: 8px; background: #ecf0f1;"></td>
-                    </tr>
-                    <tr>
-                        <td contenteditable="true" style="border: 2px solid #2c3e50; padding: 8px; background: #ecf0f1;"></td>
-                        <td contenteditable="true" style="border: 2px solid #2c3e50; padding: 8px; background: #ecf0f1;"></td>
-                        <td contenteditable="true" style="border: 2px solid #2c3e50; padding: 8px; background: #ecf0f1;"></td>
-                    </tr>
-                    <tr>
-                        <td contenteditable="true" style="border: 2px solid #2c3e50; padding: 8px; background: #ecf0f1;"></td>
-                        <td contenteditable="true" style="border: 2px solid #2c3e50; padding: 8px; background: #ecf0f1;"></td>
-                        <td contenteditable="true" style="border: 2px solid #2c3e50; padding: 8px; background: #ecf0f1;"></td>
-                    </tr>
-                    <tr>
-                        <td rowspan="3" style="border: 2px solid #2c3e50; padding: 8px; background: #f1c40f; text-align: center; font-weight: bold; color: white; font-size: 14px;">SOW</td>
-                        <td contenteditable="true" style="border: 2px solid #2c3e50; padding: 8px; background: #ecf0f1;"></td>
-                        <td contenteditable="true" style="border: 2px solid #2c3e50; padding: 8px; background: #ecf0f1;"></td>
-                        <td contenteditable="true" style="border: 2px solid #2c3e50; padding: 8px; background: #ecf0f1;"></td>
-                    </tr>
-                    <tr>
-                        <td contenteditable="true" style="border: 2px solid #2c3e50; padding: 8px; background: #ecf0f1;"></td>
-                        <td contenteditable="true" style="border: 2px solid #2c3e50; padding: 8px; background: #ecf0f1;"></td>
-                        <td contenteditable="true" style="border: 2px solid #2c3e50; padding: 8px; background: #ecf0f1;"></td>
-                    </tr>
-                    <tr>
-                        <td contenteditable="true" style="border: 2px solid #2c3e50; padding: 8px; background: #ecf0f1;"></td>
-                        <td contenteditable="true" style="border: 2px solid #2c3e50; padding: 8px; background: #ecf0f1;"></td>
-                        <td contenteditable="true" style="border: 2px solid #2c3e50; padding: 8px; background: #ecf0f1;"></td>
-                    </tr>
-                    <tr>
-                        <td rowspan="2" style="border: 2px solid #2c3e50; padding: 8px; background: #2ecc71; text-align: center; font-weight: bold; color: white; font-size: 14px;">ROW</td>
-                        <td contenteditable="true" style="border: 2px solid #2c3e50; padding: 8px; background: #ecf0f1;"></td>
-                        <td contenteditable="true" style="border: 2px solid #2c3e50; padding: 8px; background: #ecf0f1;"></td>
-                        <td contenteditable="true" style="border: 2px solid #2c3e50; padding: 8px; background: #ecf0f1;"></td>
-                    </tr>
-                    <tr>
-                        <td contenteditable="true" style="border: 2px solid #2c3e50; padding: 8px; background: #ecf0f1;"></td>
-                        <td contenteditable="true" style="border: 2px solid #2c3e50; padding: 8px; background: #ecf0f1;"></td>
-                        <td contenteditable="true" style="border: 2px solid #2c3e50; padding: 8px; background: #ecf0f1;"></td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-
-        <!-- Color Legend Bar -->
-        <div class="alarm-legend-bar">
-            <div class="legend-item legend-green">
-                <span class="legend-text">1-10<br>alarm/operator</span>
-            </div>
-            <div class="legend-item legend-yellow">
-                <span class="legend-text">10-100<br>alarm/operator</span>
-            </div>
-            <div class="legend-item legend-olive">
-                <span class="legend-text">100-1,000<br>alarm/operator</span>
-            </div>
-            <div class="legend-item legend-blue">
-                <span class="legend-text">1,000-10,000<br>alarm/operator</span>
-            </div>
-            <div class="legend-item legend-orange">
-                <span class="legend-text">>10,000<br>alarm/operator</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Save Button for Container 3 -->
-    <div style="text-align: center; margin-top: 15px; padding-bottom: 10px;">
-        <button id="saveBtn3" class="save-btn">
-            💾 Save Dashboard 3
         </button>
     </div>
 
@@ -2752,9 +2555,8 @@
             ];
 
             gaugeCards.forEach((card, index) => {
-                // Skip gaugeCard6 (Operating Window Alarms) - มี content เฉพาะของตัวเอง
                 // Skip cards ที่ไม่มีรูปใน defaultGaugeImages array
-                if (card.id === 'gaugeCard6' || !defaultGaugeImages[index]) {
+                if (!defaultGaugeImages[index]) {
                     return;
                 }
                 
@@ -2789,8 +2591,8 @@
         setDefaultGaugeImages();
 
         gaugeCards.forEach((card, index) => {
-            // Skip tableCard, gaugeCard8, and gaugeCard6 (Operating Window Alarms)
-            if (card.id === 'tableCard' || card.id === 'gaugeCard8' || card.id === 'gaugeCard6') {
+            // Skip tableCard
+            if (card.id === 'tableCard') {
                 return;
             }
             
@@ -2802,18 +2604,6 @@
                 gaugeWindowReference.style.display = 'none';
             });
         });
-
-        // เพิ่ม click event สำหรับ gaugeCard8 (Container 3, Card 4) เพื่อเปิด tableModal
-        const gaugeCard8 = document.getElementById('gaugeCard8');
-        if (gaugeCard8) {
-            gaugeCard8.style.cursor = 'pointer';
-            gaugeCard8.addEventListener('click', function() {
-                const tableModal = document.getElementById('tableModal');
-                if (tableModal) {
-                    tableModal.style.display = 'flex';
-                }
-            });
-        }
 
         // ปิด gauge modal
         closeGaugeBtn.addEventListener('click', function() {
@@ -3426,14 +3216,8 @@
             const gspBtn2 = document.getElementById('gspBtn2');
             const container1 = document.querySelector('.container');
             const container2 = document.getElementById('container2');
-            const container3 = document.getElementById('container3');
             const saveBtn = document.getElementById('saveBtn');
             const saveBtn2 = document.getElementById('saveBtn2');
-            const saveBtn3 = document.getElementById('saveBtn3');
-
-            // ซ่อน Container 3 และปุ่ม Save 3 ตอนเริ่มต้น
-            if (container3) container3.style.display = 'none';
-            if (saveBtn3) saveBtn3.parentElement.style.display = 'none';
 
             // ฟังก์ชันแสดง Container 1 & 2 (GSP1)
             function showGSP1() {
@@ -3443,27 +3227,13 @@
                 if (saveBtn) saveBtn.parentElement.style.display = 'block';
                 if (saveBtn2) saveBtn2.parentElement.style.display = 'block';
 
-                // ซ่อน Container 3 และปุ่ม Save 3
-                if (container3) container3.style.display = 'none';
-                if (saveBtn3) saveBtn3.parentElement.style.display = 'none';
-
                 // อัพเดท active state
                 gspBtn1.classList.add('active');
                 gspBtn2.classList.remove('active');
             }
 
-            // ฟังก์ชันแสดง Container 3 (GSP...)
+            // ฟังก์ชัน GSP2 (ว่างไว้สำหรับอนาคต)
             function showGSP2() {
-                // ซ่อน Container 1, 2 และปุ่ม Save
-                if (container1) container1.style.display = 'none';
-                if (container2) container2.style.display = 'none';
-                if (saveBtn) saveBtn.parentElement.style.display = 'none';
-                if (saveBtn2) saveBtn2.parentElement.style.display = 'none';
-
-                // แสดง Container 3 และปุ่ม Save 3
-                if (container3) container3.style.display = 'flex';
-                if (saveBtn3) saveBtn3.parentElement.style.display = 'block';
-
                 // อัพเดท active state
                 gspBtn1.classList.remove('active');
                 gspBtn2.classList.add('active');
