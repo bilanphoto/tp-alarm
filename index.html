@@ -1448,31 +1448,36 @@
             </div>
 
             <div class="gauge-card" id="gaugeCard4" style="position: relative; overflow: hidden; cursor: pointer;">
-                <h3 class="gauge-title" style="display: none;">ปริมาณน้ำใช้การ</h3>
-                <div class="gauge-subtitle" style="display: none;">เขื่อนเจ้าพระยา</div>
-                <canvas id="gaugeChart4" class="gauge-canvas" style="display: none;"></canvas>
-                <div class="gauge-percentage" style="display: none;">0%</div>
-                <div class="gauge-note" style="display: none;">(ปริมาณน้ำใช้การปัจจุบัน)</div>
-                <img id="gaugeCard4Image" style="width: 100%; height: 100%; object-fit: fill; position: absolute; top: 0; left: 0; display: block;">
+                <!-- Default placeholder content - will be replaced by image -->
+                <div id="gaugeCard4Placeholder" style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+                    <div style="font-size: 48px; margin-bottom: 10px;">📷</div>
+                    <div style="color: #3498db; font-size: 12px; text-align: center;">📤 คลิกเพื่ออัพโหลดรูป</div>
+                </div>
+                <img id="gaugeCard4Image" style="width: 100%; height: 100%; object-fit: fill; position: absolute; top: 0; left: 0; display: none;">
             </div>
         </div>
 
         <!-- Color Legend Bar -->
-        <div class="alarm-legend-bar">
-            <div class="legend-item legend-green">
+        <div class="alarm-legend-bar" id="legendBar2">
+            <div class="legend-item legend-green" id="legend2-green">
                 <span class="legend-text">1-10<br>alarm/operator</span>
+                <span class="legend-check" id="check2-green" style="display:none; font-size: 18px;"> ✅</span>
             </div>
-            <div class="legend-item legend-yellow">
+            <div class="legend-item legend-yellow" id="legend2-yellow">
                 <span class="legend-text">10-100<br>alarm/operator</span>
+                <span class="legend-check" id="check2-yellow" style="display:none; font-size: 18px;"> ✅</span>
             </div>
-            <div class="legend-item legend-olive">
+            <div class="legend-item legend-olive" id="legend2-olive">
                 <span class="legend-text">100-1,000<br>alarm/operator</span>
+                <span class="legend-check" id="check2-olive" style="display:none; font-size: 18px;"> ✅</span>
             </div>
-            <div class="legend-item legend-blue">
+            <div class="legend-item legend-blue" id="legend2-blue">
                 <span class="legend-text">1,000-10,000<br>alarm/operator</span>
+                <span class="legend-check" id="check2-blue" style="display:none; font-size: 18px;"> ✅</span>
             </div>
-            <div class="legend-item legend-orange">
+            <div class="legend-item legend-orange" id="legend2-orange">
                 <span class="legend-text">>10,000<br>alarm/operator</span>
+                <span class="legend-check" id="check2-orange" style="display:none; font-size: 18px;"> ✅</span>
             </div>
         </div>
     </div>
@@ -1667,21 +1672,26 @@
         </div>
 
         <!-- Color Legend Bar -->
-        <div class="alarm-legend-bar">
-            <div class="legend-item legend-green">
+        <div class="alarm-legend-bar" id="legendBar3">
+            <div class="legend-item legend-green" id="legend3-green">
                 <span class="legend-text">1-10<br>alarm/operator</span>
+                <span class="legend-check" id="check3-green" style="display:none; font-size: 18px;"> ✅</span>
             </div>
-            <div class="legend-item legend-yellow">
+            <div class="legend-item legend-yellow" id="legend3-yellow">
                 <span class="legend-text">10-100<br>alarm/operator</span>
+                <span class="legend-check" id="check3-yellow" style="display:none; font-size: 18px;"> ✅</span>
             </div>
-            <div class="legend-item legend-olive">
+            <div class="legend-item legend-olive" id="legend3-olive">
                 <span class="legend-text">100-1,000<br>alarm/operator</span>
+                <span class="legend-check" id="check3-olive" style="display:none; font-size: 18px;"> ✅</span>
             </div>
-            <div class="legend-item legend-blue">
+            <div class="legend-item legend-blue" id="legend3-blue">
                 <span class="legend-text">1,000-10,000<br>alarm/operator</span>
+                <span class="legend-check" id="check3-blue" style="display:none; font-size: 18px;"> ✅</span>
             </div>
-            <div class="legend-item legend-orange">
+            <div class="legend-item legend-orange" id="legend3-orange">
                 <span class="legend-text">>10,000<br>alarm/operator</span>
+                <span class="legend-check" id="check3-orange" style="display:none; font-size: 18px;"> ✅</span>
             </div>
         </div>
     </div>
@@ -1953,6 +1963,94 @@
                             </div>
                         </div>
                         <input type="file" id="topAlarmFileInput" accept="image/*" style="display: none;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         TOP ALARM MODAL FOR CONTAINER 2 (gaugeCard4)
+         สำหรับ Capture รูป Performance Level Report
+         ============================================================ -->
+    <div id="topAlarmModal2" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🔔 Top alarm</h3>
+                <div class="modal-controls">
+                    <button class="btn btn-close" id="closeTopAlarmBtn2">✖ ปิด</button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="instruction-container">
+                    <div class="instruction-title">📋 วิธีการ Capture ภาพจากเว็บไซต์</div>
+                    
+                    <div class="instruction-steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <div class="step-title">เปิด Exaquantum</div>
+                                <div class="step-desc">คลิกปุ่มด้านล่างเพื่อเปิดเว็บไซต์ในหน้าต่างใหม่</div>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <div class="step-title">นำทางไปหาข้อมูลที่ต้องการ</div>
+                                <div class="step-desc">คลิกที่แผนที่เพื่อเลือกเขื่อน/อ่างเก็บน้ำที่ต้องการดูข้อมูล</div>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <div class="step-title">Capture หน้าจอ</div>
+                                <div class="step-desc">
+                                    <strong>Windows:</strong> กด Windows + Shift + S<br>
+                                    <strong>Mac:</strong> กด Cmd + Shift + 4<br>
+                                    <strong>หรือ:</strong> ใช้ Screenshot tool ของ Browser
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <div class="step-title">อัพโหลดรูปภาพ</div>
+                                <div class="step-desc">นำรูปที่ Capture มาอัพโหลดในพื้นที่ด้านล่าง</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a href="http://exaq-gsp1/ExaquantumARA" target="_blank" class="open-website-btn" id="openTopAlarmWebsiteBtn2" style="display: inline-block; text-decoration: none; text-align: center;">
+                        🌐 เปิด Exaquantum
+                    </a>
+
+                    <div class="capture-buttons">
+                        <button class="capture-screen-btn" id="captureTopAlarmScreenBtn2">
+                            📸 Capture Screen
+                        </button>
+                        <span class="or-text">หรือ</span>
+                    </div>
+
+                    <div class="window-reference" id="topAlarmWindowReference2">
+                        <p class="window-reference-text">
+                            ✅ เว็บไซต์ถูกเปิดในหน้าต่างใหม่แล้ว! หลังจาก Capture เสร็จแล้ว กลับมาอัพโหลดรูปที่นี่
+                        </p>
+                    </div>
+
+                    <div class="capture-tool">
+                        <div class="capture-tool-title">📤 อัพโหลดรูปที่ Capture ได้</div>
+                        <div class="upload-area" id="topAlarmUploadArea2">
+                            <div class="upload-icon">🖼️</div>
+                            <div class="upload-text">คลิกหรือลากไฟล์มาวางที่นี่</div>
+                            <div class="upload-hint">รองรับ: JPG, PNG, GIF (ขนาดสูงสุด 10MB)</div>
+                            <div class="upload-hint" style="color: #e74c3c; font-weight: bold; margin-top: 5px;">
+                                💡 หรือกด Print Screen แล้ว Paste (Ctrl+V) ที่นี่
+                            </div>
+                        </div>
+                        <input type="file" id="topAlarmFileInput2" accept="image/*" style="display: none;">
                     </div>
                 </div>
             </div>
@@ -2902,12 +3000,49 @@
             
             adjustInputWidth(this);
             const value = parseFloat(this.textContent) || 0;
-            alarmResult.textContent = calculateAlarmRate(value);
+            const result = calculateAlarmRate(value);
+            alarmResult.textContent = result;
+            
+            // แสดง ✅ ตาม range
+            updateLegendCheckmark(parseFloat(result), 2);
         });
+        
+        // ฟังก์ชันอัพเดต ✅ ใน legend bar
+        function updateLegendCheckmark(value, container) {
+            const prefix = 'check' + container + '-';
+            const checks = ['green', 'yellow', 'olive', 'blue', 'orange'];
+            
+            // ซ่อนทุก checkmark ก่อน
+            checks.forEach(color => {
+                const el = document.getElementById(prefix + color);
+                if (el) el.style.display = 'none';
+            });
+            
+            // แสดง checkmark ตาม range
+            let targetCheck = null;
+            if (value >= 0 && value <= 10) {
+                targetCheck = prefix + 'green';      // 0-10
+            } else if (value >= 11 && value <= 100) {
+                targetCheck = prefix + 'yellow';     // 11-100
+            } else if (value >= 101 && value <= 1000) {
+                targetCheck = prefix + 'olive';      // 101-1000
+            } else if (value >= 1001 && value <= 10000) {
+                targetCheck = prefix + 'blue';       // 1001-10000
+            } else if (value > 10000) {
+                targetCheck = prefix + 'orange';     // >10000
+            }
+            
+            if (targetCheck) {
+                const el = document.getElementById(targetCheck);
+                if (el) el.style.display = 'inline';
+            }
+        }
 
         // คำนวณครั้งแรก
         const initialValue = parseFloat(alarmInput.textContent) || 0;
-        alarmResult.textContent = calculateAlarmRate(initialValue);
+        const initialResult = calculateAlarmRate(initialValue);
+        alarmResult.textContent = initialResult;
+        updateLegendCheckmark(parseFloat(initialResult), 2);
 
         // ตั้งค่าวันที่เป็นวันปัจจุบัน
         const dateInput = document.getElementById('dateInput');
@@ -4043,6 +4178,40 @@
                 // คำนวณ Alarm/H/Panel operator(2) = Total alarm / (24 * 2)
                 const result = totalAlarm / (24 * 2);
                 resultSingle3.textContent = result.toFixed(2);
+                
+                // แสดง ✅ ตาม range
+                updateLegendCheckmark3(result);
+            }
+            
+            // ฟังก์ชันอัพเดต ✅ ใน legend bar สำหรับ container 3
+            function updateLegendCheckmark3(value) {
+                const prefix = 'check3-';
+                const checks = ['green', 'yellow', 'olive', 'blue', 'orange'];
+                
+                // ซ่อนทุก checkmark ก่อน
+                checks.forEach(color => {
+                    const el = document.getElementById(prefix + color);
+                    if (el) el.style.display = 'none';
+                });
+                
+                // แสดง checkmark ตาม range
+                let targetCheck = null;
+                if (value >= 0 && value <= 10) {
+                    targetCheck = prefix + 'green';      // 0-10
+                } else if (value >= 11 && value <= 100) {
+                    targetCheck = prefix + 'yellow';     // 11-100
+                } else if (value >= 101 && value <= 1000) {
+                    targetCheck = prefix + 'olive';      // 101-1000
+                } else if (value >= 1001 && value <= 10000) {
+                    targetCheck = prefix + 'blue';       // 1001-10000
+                } else if (value > 10000) {
+                    targetCheck = prefix + 'orange';     // >10000
+                }
+                
+                if (targetCheck) {
+                    const el = document.getElementById(targetCheck);
+                    if (el) el.style.display = 'inline';
+                }
             }
             
             if (totalAlarmSingle3) {
@@ -4292,6 +4461,138 @@
         });
     </script>
 
+    <!-- Top Alarm Modal 2 Script for Container 2 (gaugeCard4) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const topAlarmModal2 = document.getElementById('topAlarmModal2');
+            const closeTopAlarmBtn2 = document.getElementById('closeTopAlarmBtn2');
+            const topAlarmUploadArea2 = document.getElementById('topAlarmUploadArea2');
+            const topAlarmFileInput2 = document.getElementById('topAlarmFileInput2');
+            const gaugeCard4 = document.getElementById('gaugeCard4');
+            const captureTopAlarmScreenBtn2 = document.getElementById('captureTopAlarmScreenBtn2');
+            const topAlarmWindowReference2 = document.getElementById('topAlarmWindowReference2');
+
+            // คลิกที่ gaugeCard4 เปิด Modal
+            if (gaugeCard4) {
+                gaugeCard4.addEventListener('click', function(e) {
+                    // ถ้าคลิกที่รูป ให้เปิด Modal แทนการทำอย่างอื่น
+                    const img = gaugeCard4.querySelector('img');
+                    if (img && img.src) {
+                        // มีรูปแล้ว ให้เปิด modal เพื่อเปลี่ยนรูป
+                    }
+                    if (topAlarmModal2) {
+                        topAlarmModal2.style.display = 'flex';
+                    }
+                });
+            }
+
+            // ปิด Modal
+            if (closeTopAlarmBtn2) {
+                closeTopAlarmBtn2.addEventListener('click', function() {
+                    topAlarmModal2.style.display = 'none';
+                });
+            }
+
+            // ปิด Modal เมื่อคลิกนอก content
+            if (topAlarmModal2) {
+                topAlarmModal2.addEventListener('click', function(e) {
+                    if (e.target === topAlarmModal2) {
+                        topAlarmModal2.style.display = 'none';
+                    }
+                });
+            }
+
+            // Capture Screen Button
+            if (captureTopAlarmScreenBtn2) {
+                captureTopAlarmScreenBtn2.addEventListener('click', function() {
+                    // แสดง window reference
+                    if (topAlarmWindowReference2) {
+                        topAlarmWindowReference2.style.display = 'block';
+                    }
+                    // เปิดเว็บไซต์
+                    window.open('http://exaq-gsp1/ExaquantumARA', '_blank');
+                });
+            }
+
+            // Upload functionality
+            if (topAlarmUploadArea2 && topAlarmFileInput2) {
+                topAlarmUploadArea2.addEventListener('click', function() {
+                    topAlarmFileInput2.click();
+                });
+
+                topAlarmUploadArea2.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    topAlarmUploadArea2.style.borderColor = '#3498db';
+                    topAlarmUploadArea2.style.background = 'rgba(52, 152, 219, 0.1)';
+                });
+
+                topAlarmUploadArea2.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    topAlarmUploadArea2.style.borderColor = '#bdc3c7';
+                    topAlarmUploadArea2.style.background = '#f8f9fa';
+                });
+
+                topAlarmUploadArea2.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    topAlarmUploadArea2.style.borderColor = '#bdc3c7';
+                    topAlarmUploadArea2.style.background = '#f8f9fa';
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        handleTopAlarmFile2(files[0]);
+                    }
+                });
+
+                topAlarmFileInput2.addEventListener('change', function(e) {
+                    if (e.target.files.length > 0) {
+                        handleTopAlarmFile2(e.target.files[0]);
+                    }
+                });
+
+                // Paste functionality for Modal 2
+                document.addEventListener('paste', function(e) {
+                    if (topAlarmModal2 && topAlarmModal2.style.display === 'flex') {
+                        const items = e.clipboardData.items;
+                        for (let i = 0; i < items.length; i++) {
+                            if (items[i].type.indexOf('image') !== -1) {
+                                const blob = items[i].getAsFile();
+                                handleTopAlarmFile2(blob);
+                                break;
+                            }
+                        }
+                    }
+                });
+            }
+
+            function handleTopAlarmFile2(file) {
+                if (!file.type.startsWith('image/')) {
+                    alert('กรุณาอัพโหลดไฟล์รูปภาพเท่านั้น');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // แสดงรูปใน gaugeCard4
+                    const card4 = document.getElementById('gaugeCard4');
+                    const placeholder = document.getElementById('gaugeCard4Placeholder');
+                    const img = document.getElementById('gaugeCard4Image');
+                    
+                    if (card4) {
+                        // ซ่อน placeholder และแสดงรูป
+                        if (placeholder) placeholder.style.display = 'none';
+                        if (img) {
+                            img.src = e.target.result;
+                            img.style.display = 'block';
+                            img.alt = 'Top Alarm Performance';
+                        }
+                        card4.style.padding = '0';
+                    }
+                    topAlarmModal2.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+
     <!-- Table Modal 3 Script -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -4470,6 +4771,287 @@
                     }
                 });
             }
+        });
+    </script>
+
+    <!-- ============================================================
+         LOCAL STORAGE SCRIPT - บันทึกค่าทุก textbox และรูปภาพ
+         ============================================================ -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const STORAGE_KEY = 'gauge_dashboard_data_v3';
+            
+            // Debounce function
+            function debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+            
+            // บันทึกข้อมูลลง localStorage
+            function saveData() {
+                try {
+                    const data = {
+                        inputs: {},
+                        selects: {},
+                        contentEditables: {},
+                        images: {},
+                        tables: {},
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    // บันทึกทุก input ที่มี id (ยกเว้น file input)
+                    document.querySelectorAll('input[id]:not([type="file"])').forEach(input => {
+                        if (input.id && input.value !== undefined) {
+                            data.inputs[input.id] = input.value;
+                        }
+                    });
+                    
+                    // บันทึกทุก select ที่มี id
+                    document.querySelectorAll('select[id]').forEach(select => {
+                        if (select.id) {
+                            data.selects[select.id] = select.value;
+                        }
+                    });
+                    
+                    // บันทึกทุก contenteditable ที่มี id (trim และเอา newlines ออก)
+                    document.querySelectorAll('[contenteditable="true"][id]').forEach(el => {
+                        if (el.id) {
+                            // ใช้ innerText และ trim เพื่อเอา whitespace/newlines ออก
+                            let value = (el.innerText || el.textContent || '').trim();
+                            // เอา newlines ออกทั้งหมด
+                            value = value.replace(/[\r\n]+/g, '');
+                            data.contentEditables[el.id] = value;
+                        }
+                    });
+                    
+                    // บันทึกรูปภาพจาก img elements ที่มี id และเป็น data URL
+                    document.querySelectorAll('img[id]').forEach(img => {
+                        if (img.id && img.src && img.src.startsWith('data:')) {
+                            data.images[img.id] = img.src;
+                        }
+                    });
+                    
+                    // บันทึก contenteditable tables ใน gauge cards
+                    ['gaugeCard6', 'gaugeCard7', 'gaugeCard8'].forEach(cardId => {
+                        const card = document.getElementById(cardId);
+                        if (card) {
+                            const cells = card.querySelectorAll('td[contenteditable="true"]');
+                            if (cells.length > 0) {
+                                // Trim ค่าแต่ละ cell
+                                data.tables[cardId] = Array.from(cells).map(cell => {
+                                    let value = (cell.innerText || cell.textContent || '').trim();
+                                    return value.replace(/[\r\n]+/g, '');
+                                });
+                            }
+                            // บันทึกรูปใน card ถ้ามี
+                            const img = card.querySelector('img');
+                            if (img && img.src && img.src.startsWith('data:')) {
+                                data.images[cardId + '_img'] = img.src;
+                            }
+                        }
+                    });
+                    
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                    console.log('✅ Data saved:', Object.keys(data.inputs).length, 'inputs,', 
+                                Object.keys(data.selects).length, 'selects,',
+                                Object.keys(data.contentEditables).length, 'contentEditables');
+                } catch (e) {
+                    console.error('❌ Error saving data:', e);
+                }
+            }
+            
+            // โหลดข้อมูลจาก localStorage
+            function loadData() {
+                try {
+                    const savedData = localStorage.getItem(STORAGE_KEY);
+                    if (!savedData) {
+                        console.log('ℹ️ No saved data found');
+                        return;
+                    }
+                    
+                    const data = JSON.parse(savedData);
+                    console.log('📂 Loading saved data from:', data.timestamp);
+                    
+                    // โหลดค่า inputs
+                    if (data.inputs) {
+                        Object.keys(data.inputs).forEach(id => {
+                            const el = document.getElementById(id);
+                            if (el && el.tagName === 'INPUT') {
+                                el.value = data.inputs[id];
+                            }
+                        });
+                    }
+                    
+                    // โหลดค่า selects
+                    if (data.selects) {
+                        Object.keys(data.selects).forEach(id => {
+                            const el = document.getElementById(id);
+                            if (el && el.tagName === 'SELECT') {
+                                el.value = data.selects[id];
+                            }
+                        });
+                    }
+                    
+                    // โหลดค่า contentEditables (trim ค่าก่อนใส่)
+                    if (data.contentEditables) {
+                        Object.keys(data.contentEditables).forEach(id => {
+                            const el = document.getElementById(id);
+                            if (el && el.hasAttribute('contenteditable')) {
+                                // Trim และเอา newlines ออก
+                                let value = (data.contentEditables[id] || '').trim();
+                                value = value.replace(/[\r\n]+/g, '');
+                                el.textContent = value;
+                            }
+                        });
+                    }
+                    
+                    // โหลดรูปภาพ
+                    if (data.images) {
+                        Object.keys(data.images).forEach(id => {
+                            // Check if it's a card image
+                            if (id.endsWith('_img')) {
+                                const cardId = id.replace('_img', '');
+                                const card = document.getElementById(cardId);
+                                if (card) {
+                                    const existingImg = card.querySelector('img');
+                                    if (existingImg) {
+                                        existingImg.src = data.images[id];
+                                    }
+                                }
+                            } else {
+                                const img = document.getElementById(id);
+                                if (img) {
+                                    img.src = data.images[id];
+                                    img.style.display = 'block';
+                                    
+                                    // ซ่อน placeholder ถ้ามี
+                                    if (id === 'gaugeCard4Image') {
+                                        const placeholder = document.getElementById('gaugeCard4Placeholder');
+                                        if (placeholder) placeholder.style.display = 'none';
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    
+                    // โหลด contenteditable tables
+                    if (data.tables) {
+                        Object.keys(data.tables).forEach(cardId => {
+                            const card = document.getElementById(cardId);
+                            if (card && data.tables[cardId]) {
+                                const cells = card.querySelectorAll('td[contenteditable="true"]');
+                                data.tables[cardId].forEach((value, index) => {
+                                    if (cells[index]) {
+                                        // Trim และเอา newlines ออก
+                                        let cleanValue = (value || '').trim();
+                                        cleanValue = cleanValue.replace(/[\r\n]+/g, '');
+                                        cells[index].textContent = cleanValue;
+                                    }
+                                });
+                            }
+                        });
+                    }
+                    
+                    console.log('✅ Data loaded successfully');
+                    
+                    // Trigger การคำนวณใหม่หลังจากโหลดข้อมูล
+                    setTimeout(() => {
+                        // Trigger calculation for Container 2
+                        const totalAlarmSingle = document.getElementById('totalAlarmSingle');
+                        if (totalAlarmSingle) {
+                            totalAlarmSingle.dispatchEvent(new Event('input', { bubbles: true }));
+                        }
+                        
+                        // Trigger calculation for Container 3
+                        const totalAlarmSingle3 = document.getElementById('totalAlarmSingle3');
+                        if (totalAlarmSingle3) {
+                            totalAlarmSingle3.dispatchEvent(new Event('input', { bubbles: true }));
+                        }
+                        
+                        console.log('📊 Calculations triggered');
+                    }, 100);
+                } catch (e) {
+                    console.error('❌ Error loading data:', e);
+                }
+            }
+            
+            // โหลดข้อมูลเมื่อหน้าโหลด
+            loadData();
+            
+            // Debounced save function
+            const debouncedSave = debounce(saveData, 500);
+            
+            // เพิ่ม event listeners สำหรับทุก input
+            document.querySelectorAll('input[id]:not([type="file"])').forEach(input => {
+                input.addEventListener('change', saveData);
+                input.addEventListener('input', debouncedSave);
+                input.addEventListener('blur', saveData);
+            });
+            
+            // เพิ่ม event listeners สำหรับทุก select
+            document.querySelectorAll('select[id]').forEach(select => {
+                select.addEventListener('change', saveData);
+            });
+            
+            // เพิ่ม event listeners สำหรับทุก contenteditable
+            document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+                el.addEventListener('blur', saveData);
+                el.addEventListener('input', debouncedSave);
+            });
+            
+            // บันทึกเมื่อมีการอัพโหลดรูป (observer for image changes)
+            const imageObserver = new MutationObserver(function(mutations) {
+                let shouldSave = false;
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'src') {
+                        shouldSave = true;
+                    } else if (mutation.type === 'childList') {
+                        shouldSave = true;
+                    }
+                });
+                if (shouldSave) {
+                    setTimeout(saveData, 100);
+                }
+            });
+            
+            // Observe all img elements
+            document.querySelectorAll('img[id]').forEach(img => {
+                imageObserver.observe(img, { attributes: true, attributeFilter: ['src'] });
+            });
+            
+            // Observe gauge cards for image changes
+            ['gaugeCard4', 'gaugeCard5', 'gaugeCard6', 'gaugeCard7', 'gaugeCard8'].forEach(cardId => {
+                const card = document.getElementById(cardId);
+                if (card) {
+                    imageObserver.observe(card, { childList: true, subtree: true, attributes: true });
+                }
+            });
+            
+            // บันทึกก่อนปิดหน้า
+            window.addEventListener('beforeunload', saveData);
+            
+            // บันทึกทุก 30 วินาที
+            setInterval(saveData, 30000);
+            
+            // ฟังก์ชันล้างข้อมูล (เรียกจาก console: clearDashboardData())
+            window.clearDashboardData = function() {
+                if (confirm('ต้องการล้างข้อมูลทั้งหมดหรือไม่?')) {
+                    localStorage.removeItem(STORAGE_KEY);
+                    location.reload();
+                }
+            };
+            
+            // ฟังก์ชันบันทึกข้อมูลทันที (เรียกจาก console: saveDashboardData())
+            window.saveDashboardData = saveData;
+            
+            console.log('💾 LocalStorage system initialized. Use clearDashboardData() to reset, saveDashboardData() to save now.');
         });
     </script>
 
