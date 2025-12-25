@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบติดตามสถานการณ์น้ำ</title>
     
+    <!-- External Libraries -->
+    <!-- html2canvas - ต้องโหลดก่อน scripts ที่ใช้งาน -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
     <!-- Cropper.js for image cropping -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
@@ -836,10 +840,6 @@
             background: rgba(231, 76, 60, 0.05);
         }
 
-        .alarm-value:focus {
-            outline: none;
-        }
-
         .alarm-value-result {
             padding: 0;
             margin: 0;
@@ -1423,28 +1423,31 @@
 
         <!-- Gauge Grid -->
         <div class="gauge-grid-2x2">
-            <div class="gauge-card">
+            <div class="gauge-card" id="gaugeCard1" style="cursor: pointer;">
                 <h3 class="gauge-title">ปริมาณน้ำใช้การ</h3>
                 <div class="gauge-subtitle">เขื่อนเจ้าพระยา</div>
                 <canvas id="gaugeChart1" class="gauge-canvas"></canvas>
                 <div class="gauge-percentage">0%</div>
                 <div class="gauge-note">(ปริมาณน้ำใช้การปัจจุบัน)</div>
+                <img id="gaugeCard1Image" class="gauge-uploaded-image" style="width: 100%; height: 100%; object-fit: fill; border-radius: 12px; display: none; position: absolute; top: 0; left: 0;">
             </div>
 
-            <div class="gauge-card">
+            <div class="gauge-card" id="gaugeCard2" style="cursor: pointer;">
                 <h3 class="gauge-title">ปริมาณน้ำใช้การ</h3>
                 <div class="gauge-subtitle">เขื่อนเจ้าพระยา</div>
                 <canvas id="gaugeChart2" class="gauge-canvas"></canvas>
                 <div class="gauge-percentage">0%</div>
                 <div class="gauge-note">(ปริมาณน้ำใช้การปัจจุบัน)</div>
+                <img id="gaugeCard2Image" class="gauge-uploaded-image" style="width: 100%; height: 100%; object-fit: fill; border-radius: 12px; display: none; position: absolute; top: 0; left: 0;">
             </div>
 
-            <div class="gauge-card">
+            <div class="gauge-card" id="gaugeCard3" style="cursor: pointer;">
                 <h3 class="gauge-title">ปริมาณน้ำใช้การ</h3>
                 <div class="gauge-subtitle">เขื่อนเจ้าพระยา</div>
                 <canvas id="gaugeChart3" class="gauge-canvas"></canvas>
                 <div class="gauge-percentage">0%</div>
                 <div class="gauge-note">(ปริมาณน้ำใช้การปัจจุบัน)</div>
+                <img id="gaugeCard3Image" class="gauge-uploaded-image" style="width: 100%; height: 100%; object-fit: fill; border-radius: 12px; display: none; position: absolute; top: 0; left: 0;">
             </div>
 
             <div class="gauge-card" id="gaugeCard4" style="position: relative; overflow: hidden; cursor: pointer;">
@@ -1874,7 +1877,7 @@
     </div>
 
     <!-- Crop Modal -->
-    <div id="cropModal" class="modal">
+    <div id="cropModal" class="modal" style="z-index: 2000;">
         <div class="modal-content" style="max-width: 900px;">
             <div class="modal-header">
                 <h3>✂️ ตัดภาพ - เลือกพื้นที่ที่ต้องการ</h3>
@@ -1952,6 +1955,19 @@
                         🌐 เปิด Exaquantum
                     </a>
 
+                    <div class="capture-buttons">
+                        <button class="capture-screen-btn" id="captureTopAlarmScreenBtn">
+                            📸 Capture Screen
+                        </button>
+                        <span class="or-text">หรือ</span>
+                    </div>
+
+                    <div class="window-reference" id="topAlarmWindowReference">
+                        <p class="window-reference-text">
+                            ✅ เว็บไซต์ถูกเปิดในหน้าต่างใหม่แล้ว! หลังจาก Capture เสร็จแล้ว กลับมาอัพโหลดรูปที่นี่
+                        </p>
+                    </div>
+
                     <div class="capture-tool">
                         <div class="capture-tool-title">📤 อัพโหลดรูปที่ Capture ได้</div>
                         <div class="upload-area" id="topAlarmUploadArea">
@@ -1970,15 +1986,15 @@
     </div>
 
     <!-- ============================================================
-         TOP ALARM MODAL FOR CONTAINER 2 (gaugeCard4)
-         สำหรับ Capture รูป Performance Level Report
+         GAUGE CARD MODAL FOR CONTAINER 2 (gaugeCard1, gaugeCard2, gaugeCard3, gaugeCard4)
+         Modal เดียวใช้ร่วมกันทุก gauge card - ทำงานเหมือน Container 1 modal
          ============================================================ -->
-    <div id="topAlarmModal2" class="modal">
+    <div id="container2GaugeModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>🔔 Top alarm</h3>
+                <h3 id="container2GaugeModalTitle">🔔 Capture/Upload รูปภาพ</h3>
                 <div class="modal-controls">
-                    <button class="btn btn-close" id="closeTopAlarmBtn2">✖ ปิด</button>
+                    <button class="btn btn-close" id="closeContainer2GaugeModal">✖ ปิด</button>
                 </div>
             </div>
             <div class="modal-body">
@@ -1998,7 +2014,7 @@
                             <div class="step-number">2</div>
                             <div class="step-content">
                                 <div class="step-title">นำทางไปหาข้อมูลที่ต้องการ</div>
-                                <div class="step-desc">คลิกที่แผนที่เพื่อเลือกเขื่อน/อ่างเก็บน้ำที่ต้องการดูข้อมูล</div>
+                                <div class="step-desc">เลือกข้อมูลที่ต้องการแสดงใน Dashboard</div>
                             </div>
                         </div>
                         
@@ -2023,18 +2039,18 @@
                         </div>
                     </div>
 
-                    <a href="http://exaq-gsp1/ExaquantumARA" target="_blank" class="open-website-btn" id="openTopAlarmWebsiteBtn2" style="display: inline-block; text-decoration: none; text-align: center;">
+                    <a href="http://exaq-gsp1/ExaquantumARA" target="_blank" class="open-website-btn" id="openContainer2WebsiteBtn" style="display: inline-block; text-decoration: none; text-align: center;">
                         🌐 เปิด Exaquantum
                     </a>
 
                     <div class="capture-buttons">
-                        <button class="capture-screen-btn" id="captureTopAlarmScreenBtn2">
+                        <button class="capture-screen-btn" id="captureContainer2ScreenBtn">
                             📸 Capture Screen
                         </button>
                         <span class="or-text">หรือ</span>
                     </div>
 
-                    <div class="window-reference" id="topAlarmWindowReference2">
+                    <div class="window-reference" id="container2WindowReference">
                         <p class="window-reference-text">
                             ✅ เว็บไซต์ถูกเปิดในหน้าต่างใหม่แล้ว! หลังจาก Capture เสร็จแล้ว กลับมาอัพโหลดรูปที่นี่
                         </p>
@@ -2042,7 +2058,7 @@
 
                     <div class="capture-tool">
                         <div class="capture-tool-title">📤 อัพโหลดรูปที่ Capture ได้</div>
-                        <div class="upload-area" id="topAlarmUploadArea2">
+                        <div class="upload-area" id="container2UploadArea">
                             <div class="upload-icon">🖼️</div>
                             <div class="upload-text">คลิกหรือลากไฟล์มาวางที่นี่</div>
                             <div class="upload-hint">รองรับ: JPG, PNG, GIF (ขนาดสูงสุด 10MB)</div>
@@ -2050,7 +2066,7 @@
                                 💡 หรือกด Print Screen แล้ว Paste (Ctrl+V) ที่นี่
                             </div>
                         </div>
-                        <input type="file" id="topAlarmFileInput2" accept="image/*" style="display: none;">
+                        <input type="file" id="container2FileInput" accept="image/*" style="display: none;">
                     </div>
                 </div>
             </div>
@@ -2791,6 +2807,17 @@
             const cropModal = document.getElementById('cropModal');
             const cropImage = document.getElementById('cropImage');
             
+            // ซ่อน modal อื่นๆ ที่อาจเปิดอยู่ (ไม่ปิดถาวร แค่ซ่อนชั่วคราว)
+            const container2Modal = document.getElementById('container2GaugeModal');
+            const topAlarmModal = document.getElementById('topAlarmModal');
+            const mainModal = document.getElementById('modal');
+            const gaugeModal = document.getElementById('gaugeModal');
+            
+            if (container2Modal) container2Modal.style.opacity = '0';
+            if (topAlarmModal) topAlarmModal.style.opacity = '0';
+            if (mainModal) mainModal.style.opacity = '0';
+            if (gaugeModal) gaugeModal.style.opacity = '0';
+            
             // Set image
             cropImage.src = imageDataUrl;
             
@@ -2836,6 +2863,35 @@
                 currentCropper.destroy();
                 currentCropper = null;
             }
+            
+            // ปิด modal หลักทั้งหมดและคืน opacity
+            const container2Modal = document.getElementById('container2GaugeModal');
+            const topAlarmModal = document.getElementById('topAlarmModal');
+            const mainModal = document.getElementById('modal');
+            const gaugeModal = document.getElementById('gaugeModal');
+            
+            // ปิดและคืน opacity - ยกเว้น gaugeModal เพราะ handleGaugeFile จะจัดการเอง
+            if (container2Modal) {
+                container2Modal.style.display = 'none';
+                container2Modal.classList.remove('show');
+                container2Modal.style.opacity = '1';
+            }
+            if (topAlarmModal) {
+                topAlarmModal.style.display = 'none';
+                topAlarmModal.style.opacity = '1';
+            }
+            if (mainModal) {
+                mainModal.classList.remove('show');
+                mainModal.style.opacity = '1';
+            }
+            // gaugeModal - คืน opacity แต่ไม่ปิดทันที (handleGaugeFile จะปิดหลัง delay)
+            if (gaugeModal) {
+                gaugeModal.style.opacity = '1';
+                // ปิดเฉพาะเมื่อไม่ใช่ gauge type (gauge type จะปิดเองหลัง 1.5 วินาที)
+                if (currentCropModalType !== 'gauge') {
+                    gaugeModal.style.display = 'none';
+                }
+            }
         }
 
         closeCropBtn.addEventListener('click', closeCropModal);
@@ -2854,9 +2910,17 @@
                     // สร้าง File object
                     const file = new File([blob], 'cropped-image.png', { type: 'image/png' });
                     
-                    // อัพเดทรูปภาพ
+                    console.log('Crop confirmed, modalType:', currentCropModalType);
+                    
+                    // อัพเดทรูปภาพตาม modal type
                     if (currentCropModalType === 'gauge') {
                         handleGaugeFile(file);
+                    } else if (currentCropModalType === 'container2Gauge') {
+                        // สำหรับ gaugeCard1, 2, 3, 4 ใน Container 2
+                        handleContainer2FileFromCrop(file);
+                    } else if (currentCropModalType === 'topAlarm') {
+                        // สำหรับ gaugeCard6 ใน Container 3
+                        handleTopAlarmFileFromCrop(file);
                     } else {
                         handleFile(file);
                     }
@@ -2866,7 +2930,7 @@
                 }
             }, 'image/png');
         });
-
+        
         // ปิด modal เมื่อคลิกนอก content
         cropModal.addEventListener('click', function(e) {
             if (e.target === cropModal) {
@@ -3223,8 +3287,11 @@
         setDefaultGaugeImages();
 
         gaugeCards.forEach((card, index) => {
-            // Skip tableCard, gaugeCard4Image, และ cards ของ Container 3 (gaugeCard5, 6, 7, 8)
+            // Skip tableCard, gaugeCard1-8 (มี handlers แยก)
             if (card.id === 'tableCard' || 
+                card.id === 'gaugeCard1' ||
+                card.id === 'gaugeCard2' ||
+                card.id === 'gaugeCard3' ||
                 card.id === 'gaugeCard4' ||
                 card.id === 'gaugeCard5' || 
                 card.id === 'gaugeCard6' || 
@@ -3369,9 +3436,35 @@
 
             const reader = new FileReader();
             reader.onload = function(e) {
-                // แสดงรูปภาพที่ gauge card ที่เลือก
-                if (currentGaugeIndex >= 0 && currentGaugeIndex < gaugeCards.length) {
-                    const targetCard = gaugeCards[currentGaugeIndex];
+                let targetCard = null;
+                
+                // ตรวจสอบว่าเป็น Container 3 (gaugeCard5 หรือ gaugeCard7) หรือไม่
+                if (window.currentContainer3CardIndex === 5 || window.currentContainer3CardIndex === 7) {
+                    const cardId = 'gaugeCard' + window.currentContainer3CardIndex;
+                    targetCard = document.getElementById(cardId);
+                    console.log('Container 3 card:', cardId, targetCard);
+                    
+                    if (targetCard) {
+                        // หา img element ที่มีอยู่แล้ว
+                        let img = targetCard.querySelector('img');
+                        if (img) {
+                            img.src = e.target.result;
+                        } else {
+                            // สร้าง img ใหม่ถ้าไม่มี
+                            img = document.createElement('img');
+                            img.style.cssText = 'width: 100%; height: 100%; object-fit: fill; cursor: pointer;';
+                            targetCard.innerHTML = '';
+                            targetCard.appendChild(img);
+                            img.src = e.target.result;
+                        }
+                        targetCard.style.padding = '0';
+                        targetCard.style.overflow = 'hidden';
+                    }
+                    // รีเซ็ต index หลังใช้งาน
+                    window.currentContainer3CardIndex = null;
+                } else if (currentGaugeIndex >= 0 && currentGaugeIndex < gaugeCards.length) {
+                    // สำหรับ gauge cards อื่นๆ
+                    targetCard = gaugeCards[currentGaugeIndex];
                     
                     // ซ่อนทุกอย่าง
                     const title = targetCard.querySelector('.gauge-title');
@@ -4359,6 +4452,9 @@
             const topAlarmUploadArea = document.getElementById('topAlarmUploadArea');
             const topAlarmFileInput = document.getElementById('topAlarmFileInput');
             const gaugeCard6 = document.getElementById('gaugeCard6');
+            const captureTopAlarmScreenBtn = document.getElementById('captureTopAlarmScreenBtn');
+            const topAlarmWindowReference = document.getElementById('topAlarmWindowReference');
+            const openTopAlarmWebsiteBtn = document.getElementById('openTopAlarmWebsiteBtn');
 
             // เปิด Modal เมื่อคลิก gaugeCard6
             if (gaugeCard6) {
@@ -4370,6 +4466,7 @@
                     }
                     if (topAlarmModal) {
                         topAlarmModal.style.display = 'flex';
+                        if (topAlarmWindowReference) topAlarmWindowReference.style.display = 'none';
                     }
                 });
             }
@@ -4387,6 +4484,23 @@
                     if (e.target === topAlarmModal) {
                         topAlarmModal.style.display = 'none';
                     }
+                });
+            }
+
+            // แสดง reference เมื่อคลิกลิงก์
+            if (openTopAlarmWebsiteBtn) {
+                openTopAlarmWebsiteBtn.addEventListener('click', function() {
+                    if (topAlarmWindowReference) {
+                        topAlarmWindowReference.style.display = 'block';
+                    }
+                });
+            }
+
+            // ===== CAPTURE SCREEN BUTTON =====
+            if (captureTopAlarmScreenBtn) {
+                captureTopAlarmScreenBtn.addEventListener('click', async function() {
+                    console.log('Capture Top Alarm Screen clicked');
+                    await captureScreen('topAlarm');
                 });
             }
 
@@ -4439,6 +4553,7 @@
                 });
             }
 
+            // Handle file function (local)
             function handleTopAlarmFile(file) {
                 if (!file.type.startsWith('image/')) {
                     alert('กรุณาอัพโหลดไฟล์รูปภาพเท่านั้น');
@@ -4447,146 +4562,285 @@
 
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    // แสดงรูปใน gaugeCard6
-                    const card6 = document.getElementById('gaugeCard6');
-                    if (card6) {
-                        card6.innerHTML = `<img src="${e.target.result}" style="width: 100%; height: 100%; object-fit: fill; cursor: pointer;" alt="Top Alarm">`;
-                        card6.style.padding = '0';
-                        card6.style.overflow = 'hidden';
-                    }
+                    setTopAlarmImage(e.target.result);
                     topAlarmModal.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+
+            // ===== SET IMAGE FUNCTION (Global) =====
+            window.setTopAlarmImage = function(imageSrc) {
+                const card6 = document.getElementById('gaugeCard6');
+                if (card6) {
+                    card6.innerHTML = `<img src="${imageSrc}" style="width: 100%; height: 100%; object-fit: fill; cursor: pointer;" alt="Top Alarm">`;
+                    card6.style.padding = '0';
+                    card6.style.overflow = 'hidden';
+                }
+            }
+
+            // ===== HANDLE FILE FROM CROP (Global) =====
+            window.handleTopAlarmFileFromCrop = function(file) {
+                console.log('handleTopAlarmFileFromCrop called');
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    window.setTopAlarmImage(e.target.result);
+                    // ปิด modal
+                    const modal = document.getElementById('topAlarmModal');
+                    if (modal) modal.style.display = 'none';
+                    showStatus('✅ อัพโหลดรูปภาพสำเร็จ!', 'success');
                 };
                 reader.readAsDataURL(file);
             }
         });
     </script>
 
-    <!-- Top Alarm Modal 2 Script for Container 2 (gaugeCard4) -->
+    <!-- ============================================================
+         CONTAINER 2 GAUGE MODAL SCRIPT (gaugeCard1, 2, 3, 4)
+         Script เดียวจัดการทุก gauge card ใน Container 2
+         ทำงานเหมือน Container 1 modal
+         ============================================================ -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const topAlarmModal2 = document.getElementById('topAlarmModal2');
-            const closeTopAlarmBtn2 = document.getElementById('closeTopAlarmBtn2');
-            const topAlarmUploadArea2 = document.getElementById('topAlarmUploadArea2');
-            const topAlarmFileInput2 = document.getElementById('topAlarmFileInput2');
+            // Elements
+            const container2GaugeModal = document.getElementById('container2GaugeModal');
+            const closeContainer2GaugeModal = document.getElementById('closeContainer2GaugeModal');
+            const container2UploadArea = document.getElementById('container2UploadArea');
+            const container2FileInput = document.getElementById('container2FileInput');
+            const captureContainer2ScreenBtn = document.getElementById('captureContainer2ScreenBtn');
+            const container2WindowReference = document.getElementById('container2WindowReference');
+            const container2GaugeModalTitle = document.getElementById('container2GaugeModalTitle');
+            const openContainer2WebsiteBtn = document.getElementById('openContainer2WebsiteBtn');
+            
+            // ใช้ window scope เพื่อให้เข้าถึงได้จาก function อื่น
+            window.currentContainer2Card = null;
+            
+            // Gauge Cards
+            const gaugeCard1 = document.getElementById('gaugeCard1');
+            const gaugeCard2 = document.getElementById('gaugeCard2');
+            const gaugeCard3 = document.getElementById('gaugeCard3');
             const gaugeCard4 = document.getElementById('gaugeCard4');
-            const captureTopAlarmScreenBtn2 = document.getElementById('captureTopAlarmScreenBtn2');
-            const topAlarmWindowReference2 = document.getElementById('topAlarmWindowReference2');
-
-            // คลิกที่ gaugeCard4 เปิด Modal
+            
+            // ===== CLICK HANDLERS สำหรับเปิด Modal =====
+            if (gaugeCard1) {
+                gaugeCard1.addEventListener('click', function() {
+                    window.currentContainer2Card = 1;
+                    window.currentContainer2CardForCrop = 1;
+                    container2GaugeModalTitle.textContent = '🔔 Capture/Upload รูปภาพ - Card 1';
+                    container2GaugeModal.style.display = 'flex';
+                    container2GaugeModal.classList.add('show');
+                    container2WindowReference.style.display = 'none';
+                });
+            }
+            
+            if (gaugeCard2) {
+                gaugeCard2.addEventListener('click', function() {
+                    window.currentContainer2Card = 2;
+                    window.currentContainer2CardForCrop = 2;
+                    container2GaugeModalTitle.textContent = '🔔 Capture/Upload รูปภาพ - Card 2';
+                    container2GaugeModal.style.display = 'flex';
+                    container2GaugeModal.classList.add('show');
+                    container2WindowReference.style.display = 'none';
+                });
+            }
+            
+            if (gaugeCard3) {
+                gaugeCard3.addEventListener('click', function() {
+                    window.currentContainer2Card = 3;
+                    window.currentContainer2CardForCrop = 3;
+                    container2GaugeModalTitle.textContent = '🔔 Capture/Upload รูปภาพ - Card 3';
+                    container2GaugeModal.style.display = 'flex';
+                    container2GaugeModal.classList.add('show');
+                    container2WindowReference.style.display = 'none';
+                });
+            }
+            
             if (gaugeCard4) {
-                gaugeCard4.addEventListener('click', function(e) {
-                    // ถ้าคลิกที่รูป ให้เปิด Modal แทนการทำอย่างอื่น
-                    const img = gaugeCard4.querySelector('img');
-                    if (img && img.src) {
-                        // มีรูปแล้ว ให้เปิด modal เพื่อเปลี่ยนรูป
-                    }
-                    if (topAlarmModal2) {
-                        topAlarmModal2.style.display = 'flex';
-                    }
+                gaugeCard4.addEventListener('click', function() {
+                    window.currentContainer2Card = 4;
+                    window.currentContainer2CardForCrop = 4;
+                    container2GaugeModalTitle.textContent = '🔔 Capture/Upload รูปภาพ - Card 4';
+                    container2GaugeModal.style.display = 'flex';
+                    container2GaugeModal.classList.add('show');
+                    container2WindowReference.style.display = 'none';
                 });
             }
-
-            // ปิด Modal
-            if (closeTopAlarmBtn2) {
-                closeTopAlarmBtn2.addEventListener('click', function() {
-                    topAlarmModal2.style.display = 'none';
+            
+            // ===== ปิด Modal =====
+            if (closeContainer2GaugeModal) {
+                closeContainer2GaugeModal.addEventListener('click', function() {
+                    container2GaugeModal.style.display = 'none';
+                    container2GaugeModal.classList.remove('show');
                 });
             }
-
+            
             // ปิด Modal เมื่อคลิกนอก content
-            if (topAlarmModal2) {
-                topAlarmModal2.addEventListener('click', function(e) {
-                    if (e.target === topAlarmModal2) {
-                        topAlarmModal2.style.display = 'none';
+            if (container2GaugeModal) {
+                container2GaugeModal.addEventListener('click', function(e) {
+                    if (e.target === container2GaugeModal) {
+                        container2GaugeModal.style.display = 'none';
+                        container2GaugeModal.classList.remove('show');
                     }
                 });
             }
-
-            // Capture Screen Button
-            if (captureTopAlarmScreenBtn2) {
-                captureTopAlarmScreenBtn2.addEventListener('click', function() {
-                    // แสดง window reference
-                    if (topAlarmWindowReference2) {
-                        topAlarmWindowReference2.style.display = 'block';
-                    }
-                    // เปิดเว็บไซต์
-                    window.open('http://exaq-gsp1/ExaquantumARA', '_blank');
+            
+            // ===== แสดง reference เมื่อคลิกลิงก์ =====
+            if (openContainer2WebsiteBtn) {
+                openContainer2WebsiteBtn.addEventListener('click', function() {
+                    container2WindowReference.style.display = 'block';
+                    container2WindowReference.classList.add('show');
+                    showStatus('✅ เปิดเว็บไซต์ในหน้าต่างใหม่แล้ว', 'info');
                 });
             }
-
-            // Upload functionality
-            if (topAlarmUploadArea2 && topAlarmFileInput2) {
-                topAlarmUploadArea2.addEventListener('click', function() {
-                    topAlarmFileInput2.click();
+            
+            // ===== CAPTURE SCREEN BUTTON =====
+            if (captureContainer2ScreenBtn) {
+                captureContainer2ScreenBtn.addEventListener('click', async function() {
+                    console.log('Capture Screen clicked, currentContainer2Card:', window.currentContainer2Card);
+                    await captureScreen('container2Gauge');
                 });
-
-                topAlarmUploadArea2.addEventListener('dragover', function(e) {
-                    e.preventDefault();
-                    topAlarmUploadArea2.style.borderColor = '#3498db';
-                    topAlarmUploadArea2.style.background = 'rgba(52, 152, 219, 0.1)';
+            }
+            
+            // ===== UPLOAD AREA - คลิก =====
+            if (container2UploadArea && container2FileInput) {
+                container2UploadArea.addEventListener('click', function() {
+                    container2FileInput.click();
                 });
-
-                topAlarmUploadArea2.addEventListener('dragleave', function(e) {
+                
+                // ===== DRAG & DROP =====
+                container2UploadArea.addEventListener('dragover', function(e) {
                     e.preventDefault();
-                    topAlarmUploadArea2.style.borderColor = '#bdc3c7';
-                    topAlarmUploadArea2.style.background = '#f8f9fa';
+                    container2UploadArea.classList.add('dragover');
                 });
-
-                topAlarmUploadArea2.addEventListener('drop', function(e) {
+                
+                container2UploadArea.addEventListener('dragleave', function(e) {
                     e.preventDefault();
-                    topAlarmUploadArea2.style.borderColor = '#bdc3c7';
-                    topAlarmUploadArea2.style.background = '#f8f9fa';
+                    container2UploadArea.classList.remove('dragover');
+                });
+                
+                container2UploadArea.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    container2UploadArea.classList.remove('dragover');
                     const files = e.dataTransfer.files;
                     if (files.length > 0) {
-                        handleTopAlarmFile2(files[0]);
+                        handleContainer2FileLocal(files[0]);
                     }
                 });
-
-                topAlarmFileInput2.addEventListener('change', function(e) {
+                
+                // ===== FILE INPUT CHANGE =====
+                container2FileInput.addEventListener('change', function(e) {
                     if (e.target.files.length > 0) {
-                        handleTopAlarmFile2(e.target.files[0]);
-                    }
-                });
-
-                // Paste functionality for Modal 2
-                document.addEventListener('paste', function(e) {
-                    if (topAlarmModal2 && topAlarmModal2.style.display === 'flex') {
-                        const items = e.clipboardData.items;
-                        for (let i = 0; i < items.length; i++) {
-                            if (items[i].type.indexOf('image') !== -1) {
-                                const blob = items[i].getAsFile();
-                                handleTopAlarmFile2(blob);
-                                break;
-                            }
-                        }
+                        handleContainer2FileLocal(e.target.files[0]);
                     }
                 });
             }
-
-            function handleTopAlarmFile2(file) {
+            
+            // ===== PASTE FUNCTIONALITY =====
+            document.addEventListener('paste', function(e) {
+                if (container2GaugeModal && container2GaugeModal.style.display === 'flex') {
+                    const items = e.clipboardData.items;
+                    for (let i = 0; i < items.length; i++) {
+                        if (items[i].type.indexOf('image') !== -1) {
+                            const blob = items[i].getAsFile();
+                            handleContainer2FileLocal(blob);
+                            break;
+                        }
+                    }
+                }
+            });
+            
+            // ===== LOCAL HANDLE FILE FUNCTION =====
+            function handleContainer2FileLocal(file) {
+                console.log('handleContainer2FileLocal called with:', file.name);
+                console.log('window.currentContainer2Card:', window.currentContainer2Card);
+                
+                // ตรวจสอบว่าเป็นไฟล์รูปภาพ
                 if (!file.type.startsWith('image/')) {
-                    alert('กรุณาอัพโหลดไฟล์รูปภาพเท่านั้น');
+                    showStatus('❌ กรุณาเลือกไฟล์รูปภาพเท่านั้น', 'error');
                     return;
                 }
-
+                
+                // ตรวจสอบขนาดไฟล์ (ไม่เกิน 10MB)
+                if (file.size > 10 * 1024 * 1024) {
+                    showStatus('❌ ไฟล์มีขนาดใหญ่เกิน 10MB', 'error');
+                    return;
+                }
+                
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    // แสดงรูปใน gaugeCard4
+                    window.setContainer2CardImage(window.currentContainer2Card, e.target.result);
+                    container2GaugeModal.style.display = 'none';
+                    container2GaugeModal.classList.remove('show');
+                    showStatus('✅ อัพโหลดรูปภาพสำเร็จ!', 'success');
+                };
+                reader.readAsDataURL(file);
+            }
+            
+            // ===== SET IMAGE TO CARD FUNCTION (Global) =====
+            window.setContainer2CardImage = function(cardNum, imageSrc) {
+                console.log('setContainer2CardImage called for card:', cardNum);
+                
+                if (cardNum === 4) {
+                    // gaugeCard4 มี placeholder และ img แยก
                     const card4 = document.getElementById('gaugeCard4');
                     const placeholder = document.getElementById('gaugeCard4Placeholder');
                     const img = document.getElementById('gaugeCard4Image');
                     
                     if (card4) {
-                        // ซ่อน placeholder และแสดงรูป
                         if (placeholder) placeholder.style.display = 'none';
                         if (img) {
-                            img.src = e.target.result;
+                            img.src = imageSrc;
                             img.style.display = 'block';
-                            img.alt = 'Top Alarm Performance';
                         }
                         card4.style.padding = '0';
                     }
-                    topAlarmModal2.style.display = 'none';
+                } else {
+                    // gaugeCard1, 2, 3 ต้องซ่อน elements เดิมและแสดงรูป
+                    const cardId = 'gaugeCard' + cardNum;
+                    const card = document.getElementById(cardId);
+                    
+                    if (card) {
+                        // ซ่อน elements เดิม
+                        const title = card.querySelector('.gauge-title');
+                        const subtitle = card.querySelector('.gauge-subtitle');
+                        const canvas = card.querySelector('.gauge-canvas');
+                        const percentage = card.querySelector('.gauge-percentage');
+                        const note = card.querySelector('.gauge-note');
+                        
+                        if (title) title.style.display = 'none';
+                        if (subtitle) subtitle.style.display = 'none';
+                        if (canvas) canvas.style.display = 'none';
+                        if (percentage) percentage.style.display = 'none';
+                        if (note) note.style.display = 'none';
+                        
+                        // แสดงรูปภาพ
+                        const img = document.getElementById(cardId + 'Image');
+                        if (img) {
+                            img.src = imageSrc;
+                            img.style.display = 'block';
+                        }
+                        
+                        card.style.padding = '0';
+                        card.style.position = 'relative';
+                        card.style.overflow = 'hidden';
+                    }
+                }
+            }
+            
+            // ===== HANDLE FILE FROM CROP (Global) =====
+            window.handleContainer2FileFromCrop = function(file) {
+                const cardNum = window.currentContainer2CardForCrop || window.currentContainer2Card || 1;
+                console.log('handleContainer2FileFromCrop called for card:', cardNum);
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    window.setContainer2CardImage(cardNum, e.target.result);
+                    // ปิด modal
+                    const modal = document.getElementById('container2GaugeModal');
+                    if (modal) {
+                        modal.style.display = 'none';
+                        modal.classList.remove('show');
+                    }
+                    showStatus('✅ อัพโหลดรูปภาพสำเร็จ!', 'success');
                 };
                 reader.readAsDataURL(file);
             }
@@ -5055,7 +5309,5 @@
         });
     </script>
 
-    <!-- html2canvas Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </body>
 </html>
