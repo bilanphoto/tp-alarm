@@ -87,9 +87,8 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            height: 480px;
-            min-height: 480px;
-            max-height: 480px;
+            min-height: 0;
+            max-height: 400px;
         }
 
         .gauge-container:hover {
@@ -1171,9 +1170,9 @@
             padding: 25px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             border: 1px solid #e5e7eb;
-            height: 480px;
-            min-height: 480px;
-            max-height: 480px;
+            flex: 1;
+            min-height: 0;
+            max-height: 400px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -2471,18 +2470,10 @@
             
             if (browserType === 'edge') {
                 browserCSS = `
-                    .browser-edge .gauge-container {
-                        height: 480px !important;
-                        min-height: 480px !important;
-                        max-height: 480px !important;
-                        flex: 0 0 480px !important;
-                    }
-                    
                     .browser-edge .gauge-card-new {
-                        height: 480px !important;
-                        min-height: 480px !important;
-                        max-height: 480px !important;
-                        flex: 0 0 480px !important;
+                        flex: 1 !important;
+                        min-height: 0 !important;
+                        max-height: none !important;
                     }
                     
                     /* Responsive container width for Edge only */
@@ -2509,19 +2500,11 @@
                 `;
             } else if (browserType === 'chrome') {
                 browserCSS = `
-                    /* Container 1 - Water Monitoring */
-                    .browser-chrome .gauge-container {
-                        height: 480px !important;
-                        min-height: 480px !important;
-                        max-height: 480px !important;
-                        flex: 0 0 480px !important;
-                    }
-                    
+                    /* Container 1 - Right gauge stretch to match left */
                     .browser-chrome .gauge-card-new {
-                        height: 480px !important;
-                        min-height: 480px !important;
-                        max-height: 480px !important;
-                        flex: 0 0 480px !important;
+                        flex: 1 !important;
+                        min-height: 0 !important;
+                        max-height: none !important;
                     }
                     
                     /* Container 2 - Alarm Management */
@@ -2563,18 +2546,10 @@
                 `;
             } else if (browserType === 'safari') {
                 browserCSS = `
-                    .browser-safari .gauge-container {
-                        height: 480px !important;
-                        min-height: 480px !important;
-                        max-height: 480px !important;
-                        flex: 0 0 480px !important;
-                    }
-                    
                     .browser-safari .gauge-card-new {
-                        height: 480px !important;
-                        min-height: 480px !important;
-                        max-height: 480px !important;
-                        flex: 0 0 480px !important;
+                        flex: 1 !important;
+                        min-height: 0 !important;
+                        max-height: none !important;
                     }
                     
                     /* Responsive container width for Safari */
@@ -2601,18 +2576,10 @@
                 `;
             } else if (browserType === 'firefox') {
                 browserCSS = `
-                    .browser-firefox .gauge-container {
-                        height: 480px !important;
-                        min-height: 480px !important;
-                        max-height: 480px !important;
-                        flex: 0 0 480px !important;
-                    }
-                    
                     .browser-firefox .gauge-card-new {
-                        height: 480px !important;
-                        min-height: 480px !important;
-                        max-height: 480px !important;
-                        flex: 0 0 480px !important;
+                        flex: 1 !important;
+                        min-height: 0 !important;
+                        max-height: none !important;
                     }
                     
                     /* Responsive container width for Firefox */
