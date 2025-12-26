@@ -2754,9 +2754,9 @@
         const drawGauge = window.drawGauge;
         const drawGaugeLeft = window.drawGaugeLeft;
 
-        // วาดเกจเมื่อโหลดหน้า
-        drawGauge();
-        drawGaugeLeft();
+        // วาดเกจเมื่อโหลดหน้า - ย้ายไปวาดหลัง Firebase โหลดข้อมูลแล้ว
+        // drawGauge();
+        // drawGaugeLeft();
 
         // ตั้งค่ารูปเริ่มต้นสำหรับฝั่งซ้าย
         function setDefaultImageLeft() {
@@ -5200,50 +5200,21 @@
         window.firebaseDatabase = null;
         const DATA_PATH = 'gauge_dashboard/data';
         
-        // Initialize Firebase เมื่อ SDK พร้อม
-        function initFirebase() {
+        // Initialize Firebase ทันที (SDK โหลดแล้วจาก head)
+        try {
             if (typeof firebase !== 'undefined') {
-                try {
-                    firebase.initializeApp(firebaseConfig);
-                    window.firebaseDatabase = firebase.database();
-                    console.log('🔥 Firebase initialized successfully');
-                    return true;
-                } catch(e) {
-                    console.error('❌ Firebase init error:', e);
-                    return false;
-                }
+                firebase.initializeApp(firebaseConfig);
+                window.firebaseDatabase = firebase.database();
+                console.log('🔥 Firebase initialized successfully');
+            } else {
+                console.error('❌ Firebase SDK not available');
             }
-            return false;
+        } catch(e) {
+            console.error('❌ Firebase init error:', e);
         }
         
         document.addEventListener('DOMContentLoaded', function() {
-            // รอให้ Firebase SDK โหลดเสร็จ (รอนานขึ้น 10 วินาที)
-            function waitForFirebase(callback, maxAttempts = 100) {
-                let attempts = 0;
-                const check = setInterval(() => {
-                    attempts++;
-                    if (typeof firebase !== 'undefined') {
-                        clearInterval(check);
-                        console.log('✅ Firebase SDK loaded after', attempts * 100, 'ms');
-                        callback();
-                    } else if (attempts >= maxAttempts) {
-                        clearInterval(check);
-                        console.warn('⚠️ Firebase SDK not loaded - sync disabled, but app still works');
-                        // ยังเรียก initFirebaseApp เพื่อให้ฟังก์ชันอื่นๆ ทำงานได้
-                        initFirebaseApp();
-                    }
-                }, 100);
-            }
-            
-            waitForFirebase(function() {
-                // ลอง init Firebase
-                if (!initFirebase()) {
-                    console.error('❌ Firebase initialization failed');
-                    return;
-                }
-                
-                initFirebaseApp();
-            });
+            initFirebaseApp();
         });
         
         function initFirebaseApp() {
@@ -5375,6 +5346,9 @@
             function loadData() {
                 if (!window.firebaseDatabase) {
                     console.warn('⚠️ Firebase not available - skipping load');
+                    // วาดเกจด้วยค่า default
+                    if (typeof window.drawGauge === 'function') window.drawGauge();
+                    if (typeof window.drawGaugeLeft === 'function') window.drawGaugeLeft();
                     return;
                 }
                 
@@ -5386,6 +5360,9 @@
                         if (!data) {
                             console.log('ℹ️ No saved data found in Firebase');
                             showSyncStatus('ไม่มีข้อมูลที่บันทึกไว้', 'info');
+                            // วาดเกจด้วยค่า default
+                            if (typeof window.drawGauge === 'function') window.drawGauge();
+                            if (typeof window.drawGaugeLeft === 'function') window.drawGaugeLeft();
                             return;
                         }
                         
@@ -5396,6 +5373,9 @@
                     .catch((error) => {
                         console.error('❌ Firebase load error:', error);
                         showSyncStatus('โหลดข้อมูลไม่สำเร็จ', 'error');
+                        // วาดเกจด้วยค่า default
+                        if (typeof window.drawGauge === 'function') window.drawGauge();
+                        if (typeof window.drawGaugeLeft === 'function') window.drawGaugeLeft();
                     });
             }
             
@@ -5495,13 +5475,20 @@
                         }
                         
                         // 🔄 วาดเกจใหม่ตามค่าที่โหลดมา
+                        const wv = document.getElementById('waterVolume');
+                        const wvl = document.getElementById('waterVolumeLeft');
+                        console.log('🎯 Before redraw - waterVolume:', wv ? wv.value : 'N/A');
+                        console.log('🎯 Before redraw - waterVolumeLeft:', wvl ? wvl.value : 'N/A');
+                        
                         if (typeof window.drawGauge === 'function') {
                             window.drawGauge();
+                            console.log('🎯 drawGauge called');
                         }
                         if (typeof window.drawGaugeLeft === 'function') {
                             window.drawGaugeLeft();
+                            console.log('🎯 drawGaugeLeft called');
                         }
-                    }, 100);
+                    }, 300);
                     
                 } finally {
                     setTimeout(() => {
