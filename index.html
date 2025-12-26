@@ -13,6 +13,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
     
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -2690,8 +2694,18 @@
                 ctx.fillText((i * 10).toString(), labelX, labelY);
             }
 
-            // ค่าปัจจุบัน (101.9%)
-            const currentValue = 101.9;
+            // อ่านค่าจาก textbox ตาม canvasId
+            let currentValue = 101.9; // default
+            let inputId = (canvasId === 'gaugeCanvasLeft') ? 'waterVolumeLeft' : 'waterUse';
+            const inputEl = document.getElementById(inputId);
+            if (inputEl && inputEl.value) {
+                // ดึงค่า % จาก string เช่น "150.97 (100.48%)" -> 100.48
+                const match = inputEl.value.match(/\(([0-9.]+)%?\)/);
+                if (match) {
+                    currentValue = parseFloat(match[1]);
+                }
+            }
+            
             const needleAngle = startAngle + (currentValue / 100) * Math.PI;
 
             // วาดเข็ม
@@ -2726,14 +2740,18 @@
             ctx.fillText('(ปริมาณน้ำใช้การปัจจุบัน)', centerX, centerY + 75);
         }
 
-        // Wrapper functions สำหรับ backward compatibility
-        function drawGauge() {
+        // Wrapper functions สำหรับ backward compatibility (global)
+        window.drawGauge = function() {
             drawSemiCircleGauge('gaugeCanvas');
         }
 
-        function drawGaugeLeft() {
+        window.drawGaugeLeft = function() {
             drawSemiCircleGauge('gaugeCanvasLeft');
         }
+        
+        // Alias for local use
+        const drawGauge = window.drawGauge;
+        const drawGaugeLeft = window.drawGaugeLeft;
 
         // วาดเกจเมื่อโหลดหน้า
         drawGauge();
@@ -4311,15 +4329,32 @@
                 if (waterUseInput) {
                     waterUseInput.addEventListener('input', function() {
                         updateBarGauge2();
+                        if (typeof drawGauge === 'function') drawGauge();
                     });
                     waterUseInput.addEventListener('blur', function() {
                         updateBarGauge2();
+                        if (typeof drawGauge === 'function') drawGauge();
                     });
                     waterUseInput.addEventListener('keyup', function(e) {
                         updateBarGauge2();
+                        if (typeof drawGauge === 'function') drawGauge();
                     });
                     // อัพเดทครั้งแรก
                     updateBarGauge2();
+                }
+                
+                // เพิ่ม event listener สำหรับ textbox waterVolumeLeft
+                var waterVolumeLeftInput = document.getElementById('waterVolumeLeft');
+                if (waterVolumeLeftInput) {
+                    waterVolumeLeftInput.addEventListener('input', function() {
+                        if (typeof drawGaugeLeft === 'function') drawGaugeLeft();
+                    });
+                    waterVolumeLeftInput.addEventListener('blur', function() {
+                        if (typeof drawGaugeLeft === 'function') drawGaugeLeft();
+                    });
+                    waterVolumeLeftInput.addEventListener('keyup', function(e) {
+                        if (typeof drawGaugeLeft === 'function') drawGaugeLeft();
+                    });
                 }
 
                 // Toggle button สำหรับซ่อน/แสดง ปริมาณน้ำใช้การ
@@ -5130,10 +5165,6 @@
     <!-- ============================================================
          FIREBASE REALTIME DATABASE - บันทึกค่าทุก textbox และรูปภาพ (sync ทุกอุปกรณ์)
          ============================================================ -->
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    
     <script>
         // =============================================
         // 🔥 FIREBASE CONFIGURATION
@@ -5394,6 +5425,14 @@
                         const totalAlarmSingle3 = document.getElementById('totalAlarmSingle3');
                         if (totalAlarmSingle3) {
                             totalAlarmSingle3.dispatchEvent(new Event('input', { bubbles: true }));
+                        }
+                        
+                        // 🔄 วาดเกจใหม่ตามค่าที่โหลดมา
+                        if (typeof drawGauge === 'function') {
+                            drawGauge();
+                        }
+                        if (typeof drawGaugeLeft === 'function') {
+                            drawGaugeLeft();
                         }
                     }, 100);
                     
