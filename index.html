@@ -88,7 +88,6 @@
             flex-direction: column;
             justify-content: center;
             min-height: 0;
-            max-height: 400px;
         }
 
         .gauge-container:hover {
@@ -547,12 +546,15 @@
             grid-template-columns: 1fr 1fr;
             gap: 30px;
             margin-top: 20px;
+            flex: 1;
+            min-height: 0;
         }
 
         .left-column, .right-column {
             display: flex;
             flex-direction: column;
             height: 100%;
+            min-height: 0;
         }
 
         @media (max-width: 768px) {
@@ -1172,7 +1174,6 @@
             border: 1px solid #e5e7eb;
             flex: 1;
             min-height: 0;
-            max-height: 400px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -2470,6 +2471,7 @@
             
             if (browserType === 'edge') {
                 browserCSS = `
+                    .browser-edge .gauge-container,
                     .browser-edge .gauge-card-new {
                         flex: 1 !important;
                         min-height: 0 !important;
@@ -2500,7 +2502,8 @@
                 `;
             } else if (browserType === 'chrome') {
                 browserCSS = `
-                    /* Container 1 - Right gauge stretch to match left */
+                    /* Container 1 - Both gauges stretch to fill */
+                    .browser-chrome .gauge-container,
                     .browser-chrome .gauge-card-new {
                         flex: 1 !important;
                         min-height: 0 !important;
@@ -2546,6 +2549,7 @@
                 `;
             } else if (browserType === 'safari') {
                 browserCSS = `
+                    .browser-safari .gauge-container,
                     .browser-safari .gauge-card-new {
                         flex: 1 !important;
                         min-height: 0 !important;
@@ -2576,6 +2580,7 @@
                 `;
             } else if (browserType === 'firefox') {
                 browserCSS = `
+                    .browser-firefox .gauge-container,
                     .browser-firefox .gauge-card-new {
                         flex: 1 !important;
                         min-height: 0 !important;
