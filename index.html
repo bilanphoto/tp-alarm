@@ -8,6 +8,26 @@
     <!-- Firebase SDK (ต้องโหลดก่อนสุด) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script>
+        // Init Firebase ทันทีหลังโหลด SDK
+        window.firebaseDatabase = null;
+        window.firebaseConfig = {
+            apiKey: "AIzaSyBH_dmA8VahE1lUNhRsxjedpCF0b6mUWUA",
+            authDomain: "top-alarm.firebaseapp.com",
+            databaseURL: "https://top-alarm-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "top-alarm",
+            storageBucket: "top-alarm.firebasestorage.app",
+            messagingSenderId: "893100796328",
+            appId: "1:893100796328:web:e293291123898c97fdd59d"
+        };
+        try {
+            firebase.initializeApp(window.firebaseConfig);
+            window.firebaseDatabase = firebase.database();
+            console.log('🔥 Firebase initialized in HEAD');
+        } catch(e) {
+            console.error('❌ Firebase HEAD init error:', e);
+        }
+    </script>
     
     <!-- External Libraries -->
     <!-- html2canvas - ต้องโหลดก่อน scripts ที่ใช้งาน -->
@@ -5184,37 +5204,36 @@
          ============================================================ -->
     <script>
         // =============================================
-        // 🔥 FIREBASE CONFIGURATION
+        // 🔥 FIREBASE - ใช้ที่ init ไว้แล้วใน HEAD
         // =============================================
-        const firebaseConfig = {
-            apiKey: "AIzaSyBH_dmA8VahE1lUNhRsxjedpCF0b6mUWUA",
-            authDomain: "top-alarm.firebaseapp.com",
-            databaseURL: "https://top-alarm-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "top-alarm",
-            storageBucket: "top-alarm.firebasestorage.app",
-            messagingSenderId: "893100796328",
-            appId: "1:893100796328:web:e293291123898c97fdd59d"
-        };
-        
-        // ตัวแปร global สำหรับ Firebase
-        window.firebaseDatabase = null;
         const DATA_PATH = 'gauge_dashboard/data';
         
-        // Initialize Firebase ทันที (SDK โหลดแล้วจาก head)
-        try {
-            if (typeof firebase !== 'undefined') {
-                firebase.initializeApp(firebaseConfig);
-                window.firebaseDatabase = firebase.database();
-                console.log('🔥 Firebase initialized successfully');
-            } else {
-                console.error('❌ Firebase SDK not available');
-            }
-        } catch(e) {
-            console.error('❌ Firebase init error:', e);
-        }
-        
-        document.addEventListener('DOMContentLoaded', function() {
+        // ใช้ window.onload เพื่อให้แน่ใจว่าทุกอย่างโหลดเสร็จ
+        window.addEventListener('load', function() {
+            console.log('📄 Window loaded');
+            console.log('🔥 Firebase database:', window.firebaseDatabase ? 'Ready' : 'Not ready');
+            
+            // เริ่มทำงาน
             initFirebaseApp();
+            
+            // 🔄 รอ 1.5 วินาที แล้วดึงค่าจาก textbox มาวาดเกจใหม่
+            setTimeout(function() {
+                console.log('🎯 1.5s delay - Redrawing gauges...');
+                
+                const wv = document.getElementById('waterVolume');
+                const wvl = document.getElementById('waterVolumeLeft');
+                console.log('🎯 waterVolume:', wv ? wv.value : 'N/A');
+                console.log('🎯 waterVolumeLeft:', wvl ? wvl.value : 'N/A');
+                
+                if (typeof window.drawGauge === 'function') {
+                    window.drawGauge();
+                    console.log('✅ drawGauge (right) called');
+                }
+                if (typeof window.drawGaugeLeft === 'function') {
+                    window.drawGaugeLeft();
+                    console.log('✅ drawGaugeLeft called');
+                }
+            }, 1500);
         });
         
         function initFirebaseApp() {
