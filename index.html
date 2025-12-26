@@ -1455,7 +1455,7 @@
 
     <!-- Save Button -->
     <div class="save-button-container">
-        <button class="save-btn" id="saveBtn">💾 Save ภาพ</button>
+        <button class="save-btn" id="saveBtn">💾 Save สถานการณ์น้ำ</button>
     </div>
 
     <!-- Second Container -->
@@ -1671,7 +1671,7 @@
     <!-- Save Button for Container 2 -->
     <div id="saveBtnContainer2" style="text-align: center; margin-top: 15px; padding-bottom: 10px;">
         <button id="saveBtn2" class="save-btn">
-            💾 Save Dashboard
+            💾 Save Alarm
         </button>
     </div>
 
@@ -1885,7 +1885,7 @@
     <!-- Save Button for Container 3 -->
     <div id="saveBtnContainer3" style="display: none; text-align: center; margin-top: 15px; padding-bottom: 10px;">
         <button id="saveBtn3" class="save-btn">
-            💾 Save Dashboard
+            💾 Save Alarm
         </button>
     </div>
 
@@ -3661,7 +3661,7 @@
                     // แสดงสถานะสำเร็จ
                     saveBtn.textContent = '✅ บันทึกสำเร็จ!';
                     setTimeout(() => {
-                        saveBtn.textContent = '💾 Save ภาพ';
+                        saveBtn.textContent = '💾 Save สถานการณ์น้ำ';
                         saveBtn.disabled = false;
                     }, 2000);
                     
@@ -3673,7 +3673,7 @@
                 saveBtn.textContent = '❌ บันทึกไม่สำเร็จ';
                 showStatus('❌ เกิดข้อผิดพลาดในการบันทึกภาพ', 'error');
                 setTimeout(() => {
-                    saveBtn.textContent = '💾 Save ภาพ';
+                    saveBtn.textContent = '💾 Save สถานการณ์น้ำ';
                     saveBtn.disabled = false;
                 }, 2000);
             }
@@ -3685,6 +3685,11 @@
                 // แสดงสถานะกำลังบันทึก
                 saveBtn2.textContent = '⏳ กำลังบันทึก...';
                 saveBtn2.disabled = true;
+
+                // 🔥 Sync to Firebase ก่อน
+                if (typeof window.syncToFirebase === 'function') {
+                    await window.syncToFirebase();
+                }
 
                 // รอให้ browser render เสร็จ
                 await new Promise(resolve => setTimeout(resolve, 200));
@@ -3725,11 +3730,11 @@
                     // แสดงสถานะสำเร็จ
                     saveBtn2.textContent = '✅ บันทึกสำเร็จ!';
                     setTimeout(() => {
-                        saveBtn2.textContent = '💾 Save Dashboard';
+                        saveBtn2.textContent = '💾 Save Alarm';
                         saveBtn2.disabled = false;
                     }, 2000);
                     
-                    showStatus(`✅ บันทึกภาพเป็น ${filename} เรียบร้อย!`, 'success');
+                    showStatus(`✅ บันทึกภาพ + Sync Cloud เรียบร้อย!`, 'success');
                 });
 
             } catch (error) {
@@ -3737,7 +3742,7 @@
                 saveBtn2.textContent = '❌ บันทึกไม่สำเร็จ';
                 showStatus('❌ เกิดข้อผิดพลาดในการบันทึกภาพ', 'error');
                 setTimeout(() => {
-                    saveBtn2.textContent = '💾 Save Dashboard';
+                    saveBtn2.textContent = '💾 Save Alarm';
                     saveBtn2.disabled = false;
                 }, 2000);
             }
@@ -4428,6 +4433,11 @@
                         saveBtn3.textContent = '⏳ กำลังบันทึก...';
                         saveBtn3.disabled = true;
 
+                        // 🔥 Sync to Firebase ก่อน
+                        if (typeof window.syncToFirebase === 'function') {
+                            await window.syncToFirebase();
+                        }
+
                         // รอให้ browser render เสร็จ
                         await new Promise(resolve => setTimeout(resolve, 200));
 
@@ -4471,7 +4481,7 @@
                             // แสดงสถานะสำเร็จ
                             saveBtn3.textContent = '✅ บันทึกสำเร็จ!';
                             setTimeout(() => {
-                                saveBtn3.textContent = '💾 Save Dashboard';
+                                saveBtn3.textContent = '💾 Save Alarm';
                                 saveBtn3.disabled = false;
                             }, 2000);
                         });
@@ -4480,7 +4490,7 @@
                         console.error('Error saving image:', error);
                         saveBtn3.textContent = '❌ บันทึกไม่สำเร็จ';
                         setTimeout(() => {
-                            saveBtn3.textContent = '💾 Save Dashboard';
+                            saveBtn3.textContent = '💾 Save Alarm';
                             saveBtn3.disabled = false;
                         }, 2000);
                     }
@@ -5438,6 +5448,77 @@
             
             // ฟังก์ชันโหลดข้อมูลใหม่
             window.reloadDashboardData = loadData;
+            
+            // =============================================
+            // 🔥 Global Sync to Firebase Function
+            // =============================================
+            window.syncToFirebase = function() {
+                return new Promise((resolve, reject) => {
+                    const data = {
+                        inputs: {},
+                        selects: {},
+                        contentEditables: {},
+                        images: {},
+                        tables: {},
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    // เก็บข้อมูลทั้งหมด
+                    document.querySelectorAll('input[id]:not([type="file"])').forEach(input => {
+                        if (input.id && input.value !== undefined) {
+                            data.inputs[input.id] = input.value;
+                        }
+                    });
+                    
+                    document.querySelectorAll('select[id]').forEach(select => {
+                        if (select.id) {
+                            data.selects[select.id] = select.value;
+                        }
+                    });
+                    
+                    document.querySelectorAll('[contenteditable="true"][id]').forEach(el => {
+                        if (el.id) {
+                            let value = (el.innerText || el.textContent || '').trim();
+                            value = value.replace(/[\r\n]+/g, '');
+                            data.contentEditables[el.id] = value;
+                        }
+                    });
+                    
+                    document.querySelectorAll('img[id]').forEach(img => {
+                        if (img.id && img.src && img.src.startsWith('data:') && img.src.length < 500000) {
+                            data.images[img.id] = img.src;
+                        }
+                    });
+                    
+                    ['gaugeCard6', 'gaugeCard7', 'gaugeCard8'].forEach(cardId => {
+                        const card = document.getElementById(cardId);
+                        if (card) {
+                            const cells = card.querySelectorAll('td[contenteditable="true"]');
+                            if (cells.length > 0) {
+                                data.tables[cardId] = Array.from(cells).map(cell => {
+                                    let value = (cell.innerText || cell.textContent || '').trim();
+                                    return value.replace(/[\r\n]+/g, '');
+                                });
+                            }
+                            const img = card.querySelector('img');
+                            if (img && img.src && img.src.startsWith('data:') && img.src.length < 500000) {
+                                data.images[cardId + '_img'] = img.src;
+                            }
+                        }
+                    });
+                    
+                    // บันทึกไป Firebase
+                    database.ref(DATA_PATH).set(data)
+                        .then(() => {
+                            console.log('✅ Firebase synced at', data.timestamp);
+                            resolve();
+                        })
+                        .catch((error) => {
+                            console.error('❌ Firebase sync error:', error);
+                            reject(error);
+                        });
+                });
+            };
             
             console.log('🔥 Firebase Realtime Database initialized');
             console.log('📌 บันทึกอัตโนมัติเมื่อปิด/รีเฟรชหน้าเพจเท่านั้น');
