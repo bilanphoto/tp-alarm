@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
     
-    <!-- Firebase SDK -->
+    <!-- Firebase SDK (load synchronously before other scripts) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     
@@ -3640,6 +3640,11 @@
                 saveBtn.textContent = '⏳ กำลังบันทึก...';
                 saveBtn.disabled = true;
 
+                // 🔥 Sync to Firebase ก่อน
+                if (typeof window.syncToFirebase === 'function') {
+                    await window.syncToFirebase();
+                }
+
                 // รอให้ browser render เสร็จ
                 await new Promise(resolve => setTimeout(resolve, 200));
 
@@ -3683,7 +3688,7 @@
                         saveBtn.disabled = false;
                     }, 2000);
                     
-                    showStatus(`✅ บันทึกภาพเป็น ${filename} เรียบร้อย!`, 'success');
+                    showStatus(`✅ บันทึกภาพ + Sync Cloud เรียบร้อย!`, 'success');
                 });
 
             } catch (error) {
@@ -5179,12 +5184,49 @@
             appId: "1:893100796328:web:e293291123898c97fdd59d"
         };
         
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        // ตัวแปร global สำหรับ Firebase
+        window.firebaseDatabase = null;
         const DATA_PATH = 'gauge_dashboard/data';
         
+        // Initialize Firebase เมื่อ SDK พร้อม
+        function initFirebase() {
+            if (typeof firebase !== 'undefined') {
+                firebase.initializeApp(firebaseConfig);
+                window.firebaseDatabase = firebase.database();
+                console.log('🔥 Firebase initialized successfully');
+                return true;
+            }
+            return false;
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
+            // รอให้ Firebase SDK โหลดเสร็จ
+            function waitForFirebase(callback, maxAttempts = 50) {
+                let attempts = 0;
+                const check = setInterval(() => {
+                    attempts++;
+                    if (typeof firebase !== 'undefined') {
+                        clearInterval(check);
+                        callback();
+                    } else if (attempts >= maxAttempts) {
+                        clearInterval(check);
+                        console.error('❌ Firebase SDK failed to load');
+                    }
+                }, 100);
+            }
+            
+            waitForFirebase(function() {
+                // ลอง init Firebase
+                if (!initFirebase()) {
+                    console.error('❌ Firebase initialization failed');
+                    return;
+                }
+                
+                initFirebaseApp();
+            });
+        });
+        
+        function initFirebaseApp() {
             let isLoadingData = false; // ป้องกัน infinite loop
             let lastSaveTime = 0;
             
@@ -5275,7 +5317,7 @@
                     });
                     
                     // บันทึกไป Firebase
-                    database.ref(DATA_PATH).set(data)
+                    window.firebaseDatabase.ref(DATA_PATH).set(data)
                         .then(() => {
                             console.log('✅ Firebase: Data saved at', data.timestamp);
                             showSyncStatus('บันทึกแล้ว ✓', 'success');
@@ -5313,7 +5355,7 @@
             function loadData() {
                 showSyncStatus('กำลังโหลดข้อมูล...', 'info');
                 
-                database.ref(DATA_PATH).once('value')
+                window.firebaseDatabase.ref(DATA_PATH).once('value')
                     .then((snapshot) => {
                         const data = snapshot.val();
                         if (!data) {
@@ -5428,11 +5470,11 @@
                         }
                         
                         // 🔄 วาดเกจใหม่ตามค่าที่โหลดมา
-                        if (typeof drawGauge === 'function') {
-                            drawGauge();
+                        if (typeof window.drawGauge === 'function') {
+                            window.drawGauge();
                         }
-                        if (typeof drawGaugeLeft === 'function') {
-                            drawGaugeLeft();
+                        if (typeof window.drawGaugeLeft === 'function') {
+                            window.drawGaugeLeft();
                         }
                     }, 100);
                     
@@ -5445,7 +5487,7 @@
             
             // 🔄 Realtime Sync - ติดตามการเปลี่ยนแปลงจากอุปกรณ์อื่น
             function setupRealtimeSync() {
-                database.ref(DATA_PATH).on('value', (snapshot) => {
+                window.firebaseDatabase.ref(DATA_PATH).on('value', (snapshot) => {
                     const data = snapshot.val();
                     if (data && !isLoadingData) {
                         console.log('🔄 Realtime update received');
@@ -5462,7 +5504,7 @@
             // ฟังก์ชันล้างข้อมูล
             window.clearDashboardData = function() {
                 if (confirm('ต้องการล้างข้อมูลทั้งหมดหรือไม่? (จะลบจาก Firebase ด้วย)')) {
-                    database.ref(DATA_PATH).remove()
+                    window.firebaseDatabase.ref(DATA_PATH).remove()
                         .then(() => {
                             console.log('✅ Firebase data cleared');
                             location.reload();
@@ -5487,6 +5529,13 @@
             // =============================================
             window.syncToFirebase = function() {
                 return new Promise((resolve, reject) => {
+                    // ตรวจสอบว่า database พร้อมใช้งาน
+                    if (!window.firebaseDatabase) {
+                        console.error('❌ Firebase database not initialized');
+                        reject(new Error('Database not initialized'));
+                        return;
+                    }
+                    
                     const data = {
                         inputs: {},
                         selects: {},
@@ -5500,6 +5549,7 @@
                     document.querySelectorAll('input[id]:not([type="file"])').forEach(input => {
                         if (input.id && input.value !== undefined) {
                             data.inputs[input.id] = input.value;
+                            console.log('📝 Saving input:', input.id, '=', input.value);
                         }
                     });
                     
@@ -5541,7 +5591,7 @@
                     });
                     
                     // บันทึกไป Firebase
-                    database.ref(DATA_PATH).set(data)
+                    window.firebaseDatabase.ref(DATA_PATH).set(data)
                         .then(() => {
                             console.log('✅ Firebase synced at', data.timestamp);
                             resolve();
@@ -5554,9 +5604,8 @@
             };
             
             console.log('🔥 Firebase Realtime Database initialized');
-            console.log('📌 บันทึกอัตโนมัติเมื่อปิด/รีเฟรชหน้าเพจเท่านั้น');
             console.log('📌 Commands: clearDashboardData(), saveDashboardData(), reloadDashboardData()');
-        });
+        }
     </script>
 
 </body>
