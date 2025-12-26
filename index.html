@@ -5410,60 +5410,11 @@
             loadData();
             setupRealtimeSync();
             
-            // Debounced save function (3 วินาที)
-            const debouncedSave = debounce(saveData, 3000);
-            
-            // เพิ่ม event listeners สำหรับทุก input
-            document.querySelectorAll('input[id]:not([type="file"])').forEach(input => {
-                input.addEventListener('change', saveData);
-                input.addEventListener('input', debouncedSave);
-                input.addEventListener('blur', saveData);
+            // บันทึกก่อนปิดหน้า หรือ รีเฟรช เท่านั้น
+            window.addEventListener('beforeunload', function() {
+                lastSaveTime = 0; // Reset throttle
+                saveData();
             });
-            
-            // เพิ่ม event listeners สำหรับทุก select
-            document.querySelectorAll('select[id]').forEach(select => {
-                select.addEventListener('change', saveData);
-            });
-            
-            // เพิ่ม event listeners สำหรับทุก contenteditable
-            document.querySelectorAll('[contenteditable="true"]').forEach(el => {
-                el.addEventListener('blur', saveData);
-                el.addEventListener('input', debouncedSave);
-            });
-            
-            // บันทึกเมื่อมีการอัพโหลดรูป (observer for image changes)
-            const imageObserver = new MutationObserver(function(mutations) {
-                let shouldSave = false;
-                mutations.forEach(function(mutation) {
-                    if (mutation.type === 'attributes' && mutation.attributeName === 'src') {
-                        shouldSave = true;
-                    } else if (mutation.type === 'childList') {
-                        shouldSave = true;
-                    }
-                });
-                if (shouldSave) {
-                    setTimeout(saveData, 500);
-                }
-            });
-            
-            // Observe all img elements
-            document.querySelectorAll('img[id]').forEach(img => {
-                imageObserver.observe(img, { attributes: true, attributeFilter: ['src'] });
-            });
-            
-            // Observe gauge cards for image changes
-            ['gaugeCard4', 'gaugeCard5', 'gaugeCard6', 'gaugeCard7', 'gaugeCard8'].forEach(cardId => {
-                const card = document.getElementById(cardId);
-                if (card) {
-                    imageObserver.observe(card, { childList: true, subtree: true, attributes: true });
-                }
-            });
-            
-            // บันทึกก่อนปิดหน้า
-            window.addEventListener('beforeunload', saveData);
-            
-            // บันทึกทุก 60 วินาที (ลดความถี่เพื่อไม่ให้เปลือง Firebase quota)
-            setInterval(saveData, 60000);
             
             // ฟังก์ชันล้างข้อมูล
             window.clearDashboardData = function() {
@@ -5479,7 +5430,7 @@
                 }
             };
             
-            // ฟังก์ชันบันทึกข้อมูลทันที
+            // ฟังก์ชันบันทึกข้อมูลทันที (เรียกด้วยมือ)
             window.saveDashboardData = function() {
                 lastSaveTime = 0; // Reset throttle
                 saveData();
@@ -5489,6 +5440,7 @@
             window.reloadDashboardData = loadData;
             
             console.log('🔥 Firebase Realtime Database initialized');
+            console.log('📌 บันทึกอัตโนมัติเมื่อปิด/รีเฟรชหน้าเพจเท่านั้น');
             console.log('📌 Commands: clearDashboardData(), saveDashboardData(), reloadDashboardData()');
         });
     </script>
