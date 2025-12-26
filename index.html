@@ -2723,12 +2723,24 @@
                 let textValue = inputEl.value || inputEl.textContent || inputEl.innerText || '';
                 textValue = textValue.trim();
                 
+                console.log('🔍 Gauge textValue from', inputId, ':', textValue);
+                
                 if (textValue) {
-                    // ดึงค่า % จาก string เช่น "150.97 (100.48%)" -> 100.48
-                    const match = textValue.match(/\(([0-9.]+)%?\)/);
+                    // รองรับหลายรูปแบบ:
+                    // 1. "150.97 (100.48%)" -> 100.48
+                    // 2. "100.48%" -> 100.48
+                    // 3. "100.48" -> 100.48
+                    let match = textValue.match(/\(([0-9.]+)%?\)/);  // รูปแบบมีวงเล็บ
+                    if (!match) {
+                        match = textValue.match(/([0-9.]+)\s*%/);  // รูปแบบ xx.xx%
+                    }
+                    if (!match) {
+                        match = textValue.match(/([0-9.]+)/);  // รูปแบบตัวเลขล้วน
+                    }
+                    
                     if (match) {
                         currentValue = parseFloat(match[1]);
-                        console.log('📊 Gauge reading from', inputId, ':', currentValue + '%');
+                        console.log('📊 Gauge parsed value:', currentValue + '%');
                     }
                 }
             }
@@ -4071,25 +4083,32 @@
             
             // เพิ่ม event listener สำหรับการเปลี่ยนแปลง (เฉพาะตอน blur - คลิกออกจากช่อง)
             div.addEventListener('blur', function() {
+                console.log('🔔 Blur event on', inputId, '- value:', this.textContent);
                 updatePercentageColor(this);
                 this.style.borderColor = '#3498db';
                 this.style.boxShadow = 'none';
                 
                 // 🔄 วาดเกจใหม่เมื่อเปลี่ยนค่า
                 if (inputId === 'waterVolume' && typeof window.drawGauge === 'function') {
+                    console.log('🎯 Calling drawGauge from blur');
                     window.drawGauge();
                 }
                 if (inputId === 'waterVolumeLeft' && typeof window.drawGaugeLeft === 'function') {
+                    console.log('🎯 Calling drawGaugeLeft from blur');
                     window.drawGaugeLeft();
                 }
             });
             
             // 🔄 เพิ่ม input event สำหรับ contenteditable
             div.addEventListener('input', function() {
+                console.log('🔔 Input event on', inputId, '- value:', this.textContent);
+                
                 if (inputId === 'waterVolume' && typeof window.drawGauge === 'function') {
+                    console.log('🎯 Calling drawGauge from input');
                     window.drawGauge();
                 }
                 if (inputId === 'waterVolumeLeft' && typeof window.drawGaugeLeft === 'function') {
+                    console.log('🎯 Calling drawGaugeLeft from input');
                     window.drawGaugeLeft();
                 }
             });
@@ -4102,8 +4121,14 @@
         
         // รอให้หน้าเว็บโหลดเสร็จแล้วแปลง input
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔧 Converting inputs to colored divs...');
+            console.log('🔧 window.drawGauge exists:', typeof window.drawGauge === 'function');
+            console.log('🔧 window.drawGaugeLeft exists:', typeof window.drawGaugeLeft === 'function');
+            
             convertToColoredInput('waterVolumeLeft');
             convertToColoredInput('waterVolume');
+            
+            console.log('🔧 Conversion complete');
         });
     </script>
 
@@ -4290,6 +4315,9 @@
                         semicircleValue.setAttribute('fill', color);
                     }
                 }
+                
+                // ทำให้เป็น global function
+                window.updateNewGauge = updateNewGauge;
 
                 // ฟังก์ชันดึงค่า % จาก textbox
                 function parsePercentFromInput(text) {
@@ -4347,6 +4375,9 @@
                         }
                     }
                 }
+                
+                // ทำให้เป็น global function
+                window.updateBarGauge2 = updateBarGauge2;
 
                 // เพิ่ม event listener สำหรับ textbox
                 if (waterVolumeInput) {
@@ -5429,12 +5460,18 @@
                 try {
                     console.log('📂 Applying data from:', data.timestamp);
                     
-                    // โหลดค่า inputs
+                    // โหลดค่า inputs (รองรับทั้ง INPUT และ DIV contenteditable)
                     if (data.inputs) {
                         Object.keys(data.inputs).forEach(id => {
                             const el = document.getElementById(id);
-                            if (el && el.tagName === 'INPUT') {
-                                el.value = data.inputs[id];
+                            if (el) {
+                                if (el.tagName === 'INPUT') {
+                                    el.value = data.inputs[id];
+                                } else if (el.hasAttribute('contenteditable')) {
+                                    // waterVolume, waterVolumeLeft ถูกแปลงเป็น div แล้ว
+                                    el.textContent = data.inputs[id];
+                                    console.log('📝 Set contenteditable', id, ':', data.inputs[id]);
+                                }
                             }
                         });
                     }
@@ -5449,16 +5486,59 @@
                         });
                     }
                     
-                    // โหลดค่า contentEditables
+                    // โหลดค่า contentEditables (รวม waterVolume, waterVolumeLeft)
                     if (data.contentEditables) {
+                        console.log('📂 Loading contentEditables:', Object.keys(data.contentEditables));
                         Object.keys(data.contentEditables).forEach(id => {
                             const el = document.getElementById(id);
                             if (el && el.hasAttribute('contenteditable')) {
                                 let value = (data.contentEditables[id] || '').trim();
                                 value = value.replace(/[\r\n]+/g, '');
                                 el.textContent = value;
+                                console.log('📝 Set contentEditable', id, ':', value);
+                                
+                                // อัพเดทสีสำหรับ waterVolume, waterVolumeLeft
+                                if (id === 'waterVolume' || id === 'waterVolumeLeft') {
+                                    if (typeof updatePercentageColor === 'function') {
+                                        updatePercentageColor(el);
+                                    }
+                                }
                             }
                         });
+                        
+                        // 🔄 วาดเกจใหม่ทันทีหลังโหลด contentEditables
+                        setTimeout(() => {
+                            console.log('🎯 Drawing gauges after contentEditables loaded...');
+                            if (typeof window.drawGauge === 'function') {
+                                window.drawGauge();
+                                console.log('✅ drawGauge called');
+                            }
+                            if (typeof window.drawGaugeLeft === 'function') {
+                                window.drawGaugeLeft();
+                                console.log('✅ drawGaugeLeft called');
+                            }
+                            
+                            // 🔄 อัพเดท semicircle gauge (newGauge) ด้วย
+                            const wv = document.getElementById('waterVolume');
+                            if (wv && typeof window.updateNewGauge === 'function') {
+                                let textValue = wv.value || wv.textContent || wv.innerText || '';
+                                textValue = textValue.trim();
+                                // ดึงค่า % จาก string
+                                let match = textValue.match(/\(([0-9.]+)%?\)/);
+                                if (!match) match = textValue.match(/([0-9.]+)\s*%/);
+                                if (match) {
+                                    const percent = parseFloat(match[1]);
+                                    console.log('🎯 Updating newGauge with:', percent, textValue);
+                                    window.updateNewGauge(percent, textValue);
+                                }
+                            }
+                            
+                            // 🔄 อัพเดท barGauge2 (ปริมาณน้ำใช้การ) ด้วย
+                            if (typeof window.updateBarGauge2 === 'function') {
+                                console.log('🎯 Updating barGauge2...');
+                                window.updateBarGauge2();
+                            }
+                        }, 100);
                     }
                     
                     // โหลดรูปภาพ
@@ -5520,8 +5600,8 @@
                         // 🔄 วาดเกจใหม่ตามค่าที่โหลดมา
                         const wv = document.getElementById('waterVolume');
                         const wvl = document.getElementById('waterVolumeLeft');
-                        console.log('🎯 Before redraw - waterVolume:', wv ? wv.value : 'N/A');
-                        console.log('🎯 Before redraw - waterVolumeLeft:', wvl ? wvl.value : 'N/A');
+                        console.log('🎯 Before redraw - waterVolume:', wv ? (wv.value || wv.textContent) : 'N/A');
+                        console.log('🎯 Before redraw - waterVolumeLeft:', wvl ? (wvl.value || wvl.textContent) : 'N/A');
                         
                         if (typeof window.drawGauge === 'function') {
                             window.drawGauge();
@@ -5531,7 +5611,7 @@
                             window.drawGaugeLeft();
                             console.log('🎯 drawGaugeLeft called');
                         }
-                    }, 300);
+                    }, 500);
                     
                 } finally {
                     setTimeout(() => {
