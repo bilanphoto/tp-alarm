@@ -87,8 +87,9 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            min-height: 0;
-            max-height: 400px;
+            height: 480px;
+            min-height: 480px;
+            max-height: 480px;
         }
 
         .gauge-container:hover {
@@ -752,32 +753,7 @@
             white-space: nowrap;
         }
 
-        .top-alarm-item label {
-            font-weight: bold;
-            color: #2c3e50;
-            font-size: 18px;
-            white-space: nowrap;
-        }
-
-        /* Old CSS to remove */
-        .alarm-single-row {
-            display: flex;
-            align-items: center;
-            gap: 30px;
-            padding: 5px 20px 10px 20px;
-        }
-
-        .alarm-title {
-            flex: 0 0 auto;
-        }
-
-        .alarm-title h2 {
-            color: #2c3e50;
-            font-size: 32px;
-            margin: 0;
-            font-weight: bold;
-        }
-
+        /* Alarm Box Combined - ใช้งานอยู่ */
         .alarm-box-combined {
             flex: 1;
             min-width: 0;
@@ -1041,11 +1017,6 @@
         }
 
         @media (max-width: 768px) {
-            .alarm-single-row {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
             .alarm-box-combined {
                 flex-direction: column;
             }
@@ -1200,10 +1171,13 @@
             padding: 25px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             border: 1px solid #e5e7eb;
-            min-height: 420px;
+            height: 480px;
+            min-height: 480px;
+            max-height: 480px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            overflow: hidden;
         }
 
         .gauge-container-new {
@@ -1242,6 +1216,111 @@
             font-weight: 700;
             font-size: 0.9em;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Performance Table Styles - Container 2 Card 4 */
+        .performance-table-container {
+            width: 100%;
+            height: 100%;
+            padding: 5px;
+            font-family: Arial, sans-serif;
+            font-size: 9px;
+            overflow: auto;
+            background: #fff;
+        }
+
+        .perf-header {
+            font-weight: bold;
+            font-size: 10px;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .perf-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 6px;
+            font-size: 8px;
+        }
+
+        .perf-table th,
+        .perf-table td {
+            border: 1px solid #999;
+            padding: 3px 4px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .perf-th-area,
+        .perf-th-key,
+        .perf-th-time {
+            background: #d0d0d0;
+            font-weight: bold;
+            text-align: left;
+        }
+
+        .perf-th-steady {
+            background: #e0e0e0;
+            font-weight: bold;
+        }
+
+        .perf-th-upset {
+            background: #f5d0a0;
+            font-weight: bold;
+        }
+
+        .perf-th-sub {
+            background: #e8e8e8;
+            font-weight: normal;
+            font-size: 7px;
+        }
+
+        .perf-td-area {
+            background: #e8e8e8;
+            font-weight: bold;
+            text-align: left;
+        }
+
+        .perf-td-state {
+            background: #e8e8e8;
+            font-weight: normal;
+            text-align: left;
+        }
+
+        .perf-td-metric {
+            background: #f5f5f5;
+            text-align: left;
+            font-size: 7px;
+        }
+
+        .perf-robust,
+        .perf-robust-header {
+            background: #90EE90;
+        }
+
+        .perf-stable,
+        .perf-stable-header {
+            background: #FFFF99;
+        }
+
+        .perf-reactive,
+        .perf-reactive-header {
+            background: #FFB366;
+        }
+
+        .perf-overloaded,
+        .perf-overloaded-header {
+            background: #FF6633;
+            color: #fff;
+        }
+
+        .perf-table td[contenteditable="true"] {
+            cursor: text;
+        }
+
+        .perf-table td[contenteditable="true"]:focus {
+            outline: 2px solid #3498db;
+            background: #e8f4fc;
         }
     </style>
 </head>
@@ -1450,11 +1529,115 @@
                 <img id="gaugeCard3Image" class="gauge-uploaded-image" style="width: 100%; height: 100%; object-fit: fill; border-radius: 12px; display: none; position: absolute; top: 0; left: 0;">
             </div>
 
-            <div class="gauge-card" id="gaugeCard4" style="position: relative; overflow: hidden; cursor: pointer;">
-                <!-- Default placeholder content - will be replaced by image -->
-                <div id="gaugeCard4Placeholder" style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
-                    <div style="font-size: 48px; margin-bottom: 10px;">📷</div>
-                    <div style="color: #3498db; font-size: 12px; text-align: center;">📤 คลิกเพื่ออัพโหลดรูป</div>
+            <div class="gauge-card" id="gaugeCard4" style="position: relative; overflow: auto; cursor: pointer; padding: 8px; background: #fff;">
+                <!-- Performance Table - ตารางตามภาพต้นแบบ -->
+                <div id="gaugeCard4Placeholder" class="performance-table-container">
+                    <div class="perf-header">This report displays the performance level of areas in the plant</div>
+                    
+                    <!-- Table 1: Main Metrics -->
+                    <table class="perf-table perf-table-main">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" class="perf-th-area">Area</th>
+                                <th colspan="2" class="perf-th-steady">Steady State</th>
+                                <th colspan="2" class="perf-th-upset">Upset State</th>
+                            </tr>
+                            <tr>
+                                <th class="perf-th-sub">Average Alarm Rate<br>(10 minutes)</th>
+                                <th class="perf-th-sub">% Hours > 30 Alarms</th>
+                                <th class="perf-th-sub">Max Alarm Rate (10 minutes)</th>
+                                <th class="perf-th-sub">% 10 Minutes > 5 Alarms</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="perf-td-area">UT</td>
+                                <td class="perf-robust" contenteditable="true">0.49</td>
+                                <td class="perf-robust" contenteditable="true">0.00</td>
+                                <td class="perf-stable" contenteditable="true">6</td>
+                                <td class="perf-reactive" contenteditable="true">2.90</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <!-- Table 2: Key -->
+                    <table class="perf-table perf-table-key">
+                        <thead>
+                            <tr>
+                                <th colspan="2" class="perf-th-key">Key</th>
+                                <th class="perf-robust-header">Robust</th>
+                                <th class="perf-stable-header">Stable</th>
+                                <th class="perf-reactive-header">Reactive</th>
+                                <th class="perf-overloaded-header">Overloaded</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td rowspan="2" class="perf-td-state">Steady State</td>
+                                <td class="perf-td-metric">Average Alarm Rate</td>
+                                <td class="perf-robust">< 1</td>
+                                <td class="perf-stable">< 2</td>
+                                <td class="perf-reactive">< 10</td>
+                                <td class="perf-overloaded">>= 10</td>
+                            </tr>
+                            <tr>
+                                <td class="perf-td-metric">% Hours > 30 Alarms</td>
+                                <td class="perf-robust"><= 1%</td>
+                                <td class="perf-stable">< 10%</td>
+                                <td class="perf-reactive">< 25%</td>
+                                <td class="perf-overloaded">>= 25%</td>
+                            </tr>
+                            <tr>
+                                <td rowspan="2" class="perf-td-state">Upset State</td>
+                                <td class="perf-td-metric">Maximum Alarm Rate</td>
+                                <td class="perf-robust">< 10</td>
+                                <td class="perf-stable">< 20</td>
+                                <td class="perf-reactive">< 100</td>
+                                <td class="perf-overloaded">>= 100</td>
+                            </tr>
+                            <tr>
+                                <td class="perf-td-metric">% 10 Minutes > 5 Alarms</td>
+                                <td class="perf-robust">0%</td>
+                                <td class="perf-stable">< 1%</td>
+                                <td class="perf-reactive">< 2.5%</td>
+                                <td class="perf-overloaded">>= 2.5%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <!-- Table 3: % Time in each performance category -->
+                    <table class="perf-table perf-table-time">
+                        <thead>
+                            <tr>
+                                <th colspan="6" class="perf-th-time">% Time in each performance category</th>
+                            </tr>
+                            <tr>
+                                <th class="perf-th-area">Area</th>
+                                <th class="perf-th-sub"></th>
+                                <th class="perf-robust-header">Robust</th>
+                                <th class="perf-stable-header">Stable</th>
+                                <th class="perf-reactive-header">Reactive</th>
+                                <th class="perf-overloaded-header">Overloaded</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td rowspan="2" class="perf-td-area">UT</td>
+                                <td class="perf-td-metric">Avg</td>
+                                <td contenteditable="true">81.88</td>
+                                <td contenteditable="true">6.52</td>
+                                <td contenteditable="true">11.59</td>
+                                <td contenteditable="true">0.00</td>
+                            </tr>
+                            <tr>
+                                <td class="perf-td-metric">Max</td>
+                                <td contenteditable="true">100.00</td>
+                                <td contenteditable="true">0.00</td>
+                                <td contenteditable="true">0.00</td>
+                                <td contenteditable="true">0.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
                 <img id="gaugeCard4Image" style="width: 100%; height: 100%; object-fit: fill; position: absolute; top: 0; left: 0; display: none;">
             </div>
@@ -2289,10 +2472,17 @@
             if (browserType === 'edge') {
                 browserCSS = `
                     .browser-edge .gauge-container {
-                        height: 730px !important;
-                        min-height: 730px !important;
-                        max-height: 730px !important;
-                        flex: 0 0 730px !important;
+                        height: 480px !important;
+                        min-height: 480px !important;
+                        max-height: 480px !important;
+                        flex: 0 0 480px !important;
+                    }
+                    
+                    .browser-edge .gauge-card-new {
+                        height: 480px !important;
+                        min-height: 480px !important;
+                        max-height: 480px !important;
+                        flex: 0 0 480px !important;
                     }
                     
                     /* Responsive container width for Edge only */
@@ -2321,7 +2511,17 @@
                 browserCSS = `
                     /* Container 1 - Water Monitoring */
                     .browser-chrome .gauge-container {
-                        max-height: 520px !important;
+                        height: 480px !important;
+                        min-height: 480px !important;
+                        max-height: 480px !important;
+                        flex: 0 0 480px !important;
+                    }
+                    
+                    .browser-chrome .gauge-card-new {
+                        height: 480px !important;
+                        min-height: 480px !important;
+                        max-height: 480px !important;
+                        flex: 0 0 480px !important;
                     }
                     
                     /* Container 2 - Alarm Management */
@@ -2364,8 +2564,17 @@
             } else if (browserType === 'safari') {
                 browserCSS = `
                     .browser-safari .gauge-container {
-                        height: 390px !important;
-                        max-height: none !important;
+                        height: 480px !important;
+                        min-height: 480px !important;
+                        max-height: 480px !important;
+                        flex: 0 0 480px !important;
+                    }
+                    
+                    .browser-safari .gauge-card-new {
+                        height: 480px !important;
+                        min-height: 480px !important;
+                        max-height: 480px !important;
+                        flex: 0 0 480px !important;
                     }
                     
                     /* Responsive container width for Safari */
@@ -2393,8 +2602,17 @@
             } else if (browserType === 'firefox') {
                 browserCSS = `
                     .browser-firefox .gauge-container {
-                        height: 395px !important;
-                        max-height: none !important;
+                        height: 480px !important;
+                        min-height: 480px !important;
+                        max-height: 480px !important;
+                        flex: 0 0 480px !important;
+                    }
+                    
+                    .browser-firefox .gauge-card-new {
+                        height: 480px !important;
+                        min-height: 480px !important;
+                        max-height: 480px !important;
+                        flex: 0 0 480px !important;
                     }
                     
                     /* Responsive container width for Firefox */
@@ -2428,9 +2646,9 @@
             console.log('Detected Browser:', browserType);
         })();
         
-        // ฟังก์ชันสำหรับวาดเกจวงกลม
-        function drawGauge() {
-            const canvas = document.getElementById('gaugeCanvas');
+        // ฟังก์ชันสำหรับวาดเกจวงกลม (รวม drawGauge และ drawGaugeLeft)
+        function drawSemiCircleGauge(canvasId) {
+            const canvas = document.getElementById(canvasId);
             if (!canvas) return;
             
             const ctx = canvas.getContext('2d');
@@ -2444,8 +2662,7 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             // วาดส่วนโค้งแบบ semicircle
-            const startAngle = Math.PI; // เริ่มจากซ้าย
-            const endAngle = 2 * Math.PI; // จบที่ขวา
+            const startAngle = Math.PI; // เริ่มจากซ้าย (180°)
 
             // สีและช่วงของเกจ
             const segments = [
@@ -2537,113 +2754,13 @@
             ctx.fillText('(ปริมาณน้ำใช้การปัจจุบัน)', centerX, centerY + 75);
         }
 
-        // ฟังก์ชันสำหรับวาดเกจวงกลม (ฝั่งซ้าย)
+        // Wrapper functions สำหรับ backward compatibility
+        function drawGauge() {
+            drawSemiCircleGauge('gaugeCanvas');
+        }
+
         function drawGaugeLeft() {
-            const canvas = document.getElementById('gaugeCanvasLeft');
-            if (!canvas) return;
-            
-            const ctx = canvas.getContext('2d');
-            if (!ctx) return;
-            
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2 + 20;
-            const radius = 100;
-
-            // ล้าง canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // วาดส่วนโค้งแบบ semicircle
-            const startAngle = Math.PI;
-            const endAngle = 2 * Math.PI;
-
-            // สีและช่วงของเกจ
-            const segments = [
-                { color: '#e74c3c', start: 0, end: 0.2 },
-                { color: '#e67e22', start: 0.2, end: 0.4 },
-                { color: '#f1c40f', start: 0.4, end: 0.6 },
-                { color: '#2ecc71', start: 0.6, end: 0.8 },
-                { color: '#27ae60', start: 0.8, end: 1.0 }
-            ];
-
-            // วาดแต่ละส่วนของเกจ
-            segments.forEach(segment => {
-                ctx.beginPath();
-                ctx.arc(
-                    centerX, 
-                    centerY, 
-                    radius,
-                    startAngle + segment.start * Math.PI,
-                    startAngle + segment.end * Math.PI
-                );
-                ctx.lineWidth = 25;
-                ctx.strokeStyle = segment.color;
-                ctx.stroke();
-            });
-
-            // วาดเส้นขีดบอกระดับ
-            for (let i = 0; i <= 10; i++) {
-                const angle = startAngle + (i / 10) * Math.PI;
-                const innerRadius = radius - 15;
-                const outerRadius = radius + 10;
-                
-                ctx.beginPath();
-                ctx.moveTo(
-                    centerX + innerRadius * Math.cos(angle),
-                    centerY + innerRadius * Math.sin(angle)
-                );
-                ctx.lineTo(
-                    centerX + outerRadius * Math.cos(angle),
-                    centerY + outerRadius * Math.sin(angle)
-                );
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = '#2c3e50';
-                ctx.stroke();
-
-                // ใส่ตัวเลข
-                const labelRadius = radius + 30;
-                const labelX = centerX + labelRadius * Math.cos(angle);
-                const labelY = centerY + labelRadius * Math.sin(angle);
-                ctx.fillStyle = '#2c3e50';
-                ctx.font = 'bold 12px Arial';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText((i * 10).toString(), labelX, labelY);
-            }
-
-            // ค่าปัจจุบัน (101.9%)
-            const currentValue = 101.9;
-            const needleAngle = startAngle + (currentValue / 100) * Math.PI;
-
-            // วาดเข็ม
-            ctx.beginPath();
-            ctx.moveTo(centerX, centerY);
-            const needleLength = radius - 20;
-            const needleX = centerX + needleLength * Math.cos(needleAngle);
-            const needleY = centerY + needleLength * Math.sin(needleAngle);
-            ctx.lineTo(needleX, needleY);
-            ctx.lineWidth = 4;
-            ctx.strokeStyle = '#2c3e50';
-            ctx.lineCap = 'round';
-            ctx.stroke();
-
-            // วาดจุดกลาง
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, 10, 0, 2 * Math.PI);
-            ctx.fillStyle = '#34495e';
-            ctx.fill();
-            ctx.strokeStyle = '#2c3e50';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            // แสดงค่าตรงกลาง
-            ctx.fillStyle = '#2c3e50';
-            ctx.font = 'bold 28px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText(currentValue + '%', centerX, centerY + 50);
-            
-            ctx.font = '14px Arial';
-            ctx.fillStyle = '#7f8c8d';
-            ctx.fillText('(ปริมาณน้ำใช้การปัจจุบัน)', centerX, centerY + 75);
+            drawSemiCircleGauge('gaugeCanvasLeft');
         }
 
         // วาดเกจเมื่อโหลดหน้า
