@@ -1554,8 +1554,8 @@
                                 <td class="perf-td-area">UT</td>
                                 <td class="perf-robust" contenteditable="true">0.49</td>
                                 <td class="perf-robust" contenteditable="true">0.00</td>
-                                <td class="perf-stable" contenteditable="true">6</td>
-                                <td class="perf-reactive" contenteditable="true">2.90</td>
+                                <td class="perf-reactive" contenteditable="true">6</td>
+                                <td class="perf-overloaded" contenteditable="true">2.90</td>
                             </tr>
                         </tbody>
                     </table>
@@ -5118,11 +5118,34 @@
     </script>
 
     <!-- ============================================================
-         LOCAL STORAGE SCRIPT - บันทึกค่าทุก textbox และรูปภาพ
+         FIREBASE REALTIME DATABASE - บันทึกค่าทุก textbox และรูปภาพ (sync ทุกอุปกรณ์)
          ============================================================ -->
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    
     <script>
+        // =============================================
+        // 🔥 FIREBASE CONFIGURATION
+        // =============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBH_dmA8VahE1lUNhRsxjedpCF0b6mUWUA",
+            authDomain: "top-alarm.firebaseapp.com",
+            databaseURL: "https://top-alarm-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "top-alarm",
+            storageBucket: "top-alarm.firebasestorage.app",
+            messagingSenderId: "893100796328",
+            appId: "1:893100796328:web:e293291123898c97fdd59d"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const DATA_PATH = 'gauge_dashboard/data';
+        
         document.addEventListener('DOMContentLoaded', function() {
-            const STORAGE_KEY = 'gauge_dashboard_data_v3';
+            let isLoadingData = false; // ป้องกัน infinite loop
+            let lastSaveTime = 0;
             
             // Debounce function
             function debounce(func, wait) {
@@ -5137,8 +5160,16 @@
                 };
             }
             
-            // บันทึกข้อมูลลง localStorage
+            // บันทึกข้อมูลไป Firebase
             function saveData() {
+                // ป้องกันการ save ขณะ load
+                if (isLoadingData) return;
+                
+                // Throttle: ไม่ save บ่อยกว่า 2 วินาที
+                const now = Date.now();
+                if (now - lastSaveTime < 2000) return;
+                lastSaveTime = now;
+                
                 try {
                     const data = {
                         inputs: {},
@@ -5166,18 +5197,20 @@
                     // บันทึกทุก contenteditable ที่มี id (trim และเอา newlines ออก)
                     document.querySelectorAll('[contenteditable="true"][id]').forEach(el => {
                         if (el.id) {
-                            // ใช้ innerText และ trim เพื่อเอา whitespace/newlines ออก
                             let value = (el.innerText || el.textContent || '').trim();
-                            // เอา newlines ออกทั้งหมด
                             value = value.replace(/[\r\n]+/g, '');
                             data.contentEditables[el.id] = value;
                         }
                     });
                     
                     // บันทึกรูปภาพจาก img elements ที่มี id และเป็น data URL
+                    // หมายเหตุ: Firebase มี limit 10MB ต่อ node, รูปใหญ่อาจไม่ได้
                     document.querySelectorAll('img[id]').forEach(img => {
                         if (img.id && img.src && img.src.startsWith('data:')) {
-                            data.images[img.id] = img.src;
+                            // จำกัดขนาดรูป (ไม่เกิน 500KB)
+                            if (img.src.length < 500000) {
+                                data.images[img.id] = img.src;
+                            }
                         }
                     });
                     
@@ -5187,40 +5220,83 @@
                         if (card) {
                             const cells = card.querySelectorAll('td[contenteditable="true"]');
                             if (cells.length > 0) {
-                                // Trim ค่าแต่ละ cell
                                 data.tables[cardId] = Array.from(cells).map(cell => {
                                     let value = (cell.innerText || cell.textContent || '').trim();
                                     return value.replace(/[\r\n]+/g, '');
                                 });
                             }
-                            // บันทึกรูปใน card ถ้ามี
+                            // บันทึกรูปใน card ถ้ามี (จำกัดขนาด)
                             const img = card.querySelector('img');
-                            if (img && img.src && img.src.startsWith('data:')) {
+                            if (img && img.src && img.src.startsWith('data:') && img.src.length < 500000) {
                                 data.images[cardId + '_img'] = img.src;
                             }
                         }
                     });
                     
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-                    console.log('✅ Data saved:', Object.keys(data.inputs).length, 'inputs,', 
-                                Object.keys(data.selects).length, 'selects,',
-                                Object.keys(data.contentEditables).length, 'contentEditables');
+                    // บันทึกไป Firebase
+                    database.ref(DATA_PATH).set(data)
+                        .then(() => {
+                            console.log('✅ Firebase: Data saved at', data.timestamp);
+                            showSyncStatus('บันทึกแล้ว ✓', 'success');
+                        })
+                        .catch((error) => {
+                            console.error('❌ Firebase save error:', error);
+                            showSyncStatus('บันทึกไม่สำเร็จ', 'error');
+                        });
+                        
                 } catch (e) {
-                    console.error('❌ Error saving data:', e);
+                    console.error('❌ Error preparing data:', e);
                 }
             }
             
-            // โหลดข้อมูลจาก localStorage
+            // แสดงสถานะ sync
+            function showSyncStatus(message, type) {
+                let statusEl = document.getElementById('syncStatus');
+                if (!statusEl) {
+                    statusEl = document.createElement('div');
+                    statusEl.id = 'syncStatus';
+                    statusEl.style.cssText = 'position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; border-radius: 5px; font-size: 14px; z-index: 10000; transition: opacity 0.3s;';
+                    document.body.appendChild(statusEl);
+                }
+                statusEl.textContent = message;
+                statusEl.style.background = type === 'success' ? '#4CAF50' : type === 'error' ? '#f44336' : '#2196F3';
+                statusEl.style.color = 'white';
+                statusEl.style.opacity = '1';
+                
+                setTimeout(() => {
+                    statusEl.style.opacity = '0';
+                }, 2000);
+            }
+            
+            // โหลดข้อมูลจาก Firebase
             function loadData() {
+                showSyncStatus('กำลังโหลดข้อมูล...', 'info');
+                
+                database.ref(DATA_PATH).once('value')
+                    .then((snapshot) => {
+                        const data = snapshot.val();
+                        if (!data) {
+                            console.log('ℹ️ No saved data found in Firebase');
+                            showSyncStatus('ไม่มีข้อมูลที่บันทึกไว้', 'info');
+                            return;
+                        }
+                        
+                        applyData(data);
+                        console.log('✅ Data loaded from Firebase');
+                        showSyncStatus('โหลดข้อมูลสำเร็จ ✓', 'success');
+                    })
+                    .catch((error) => {
+                        console.error('❌ Firebase load error:', error);
+                        showSyncStatus('โหลดข้อมูลไม่สำเร็จ', 'error');
+                    });
+            }
+            
+            // ฟังก์ชันใส่ข้อมูลลงหน้าเว็บ
+            function applyData(data) {
+                isLoadingData = true;
+                
                 try {
-                    const savedData = localStorage.getItem(STORAGE_KEY);
-                    if (!savedData) {
-                        console.log('ℹ️ No saved data found');
-                        return;
-                    }
-                    
-                    const data = JSON.parse(savedData);
-                    console.log('📂 Loading saved data from:', data.timestamp);
+                    console.log('📂 Applying data from:', data.timestamp);
                     
                     // โหลดค่า inputs
                     if (data.inputs) {
@@ -5242,12 +5318,11 @@
                         });
                     }
                     
-                    // โหลดค่า contentEditables (trim ค่าก่อนใส่)
+                    // โหลดค่า contentEditables
                     if (data.contentEditables) {
                         Object.keys(data.contentEditables).forEach(id => {
                             const el = document.getElementById(id);
                             if (el && el.hasAttribute('contenteditable')) {
-                                // Trim และเอา newlines ออก
                                 let value = (data.contentEditables[id] || '').trim();
                                 value = value.replace(/[\r\n]+/g, '');
                                 el.textContent = value;
@@ -5258,7 +5333,6 @@
                     // โหลดรูปภาพ
                     if (data.images) {
                         Object.keys(data.images).forEach(id => {
-                            // Check if it's a card image
                             if (id.endsWith('_img')) {
                                 const cardId = id.replace('_img', '');
                                 const card = document.getElementById(cardId);
@@ -5274,7 +5348,6 @@
                                     img.src = data.images[id];
                                     img.style.display = 'block';
                                     
-                                    // ซ่อน placeholder ถ้ามี
                                     if (id === 'gaugeCard4Image') {
                                         const placeholder = document.getElementById('gaugeCard4Placeholder');
                                         if (placeholder) placeholder.style.display = 'none';
@@ -5292,7 +5365,6 @@
                                 const cells = card.querySelectorAll('td[contenteditable="true"]');
                                 data.tables[cardId].forEach((value, index) => {
                                     if (cells[index]) {
-                                        // Trim และเอา newlines ออก
                                         let cleanValue = (value || '').trim();
                                         cleanValue = cleanValue.replace(/[\r\n]+/g, '');
                                         cells[index].textContent = cleanValue;
@@ -5302,34 +5374,44 @@
                         });
                     }
                     
-                    console.log('✅ Data loaded successfully');
-                    
-                    // Trigger การคำนวณใหม่หลังจากโหลดข้อมูล
+                    // Trigger การคำนวณใหม่
                     setTimeout(() => {
-                        // Trigger calculation for Container 2
                         const totalAlarmSingle = document.getElementById('totalAlarmSingle');
                         if (totalAlarmSingle) {
                             totalAlarmSingle.dispatchEvent(new Event('input', { bubbles: true }));
                         }
                         
-                        // Trigger calculation for Container 3
                         const totalAlarmSingle3 = document.getElementById('totalAlarmSingle3');
                         if (totalAlarmSingle3) {
                             totalAlarmSingle3.dispatchEvent(new Event('input', { bubbles: true }));
                         }
-                        
-                        console.log('📊 Calculations triggered');
                     }, 100);
-                } catch (e) {
-                    console.error('❌ Error loading data:', e);
+                    
+                } finally {
+                    setTimeout(() => {
+                        isLoadingData = false;
+                    }, 500);
                 }
             }
             
-            // โหลดข้อมูลเมื่อหน้าโหลด
-            loadData();
+            // 🔄 Realtime Sync - ติดตามการเปลี่ยนแปลงจากอุปกรณ์อื่น
+            function setupRealtimeSync() {
+                database.ref(DATA_PATH).on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (data && !isLoadingData) {
+                        console.log('🔄 Realtime update received');
+                        applyData(data);
+                        showSyncStatus('Sync จากอุปกรณ์อื่น ✓', 'success');
+                    }
+                });
+            }
             
-            // Debounced save function
-            const debouncedSave = debounce(saveData, 500);
+            // โหลดข้อมูลเมื่อหน้าโหลด และเริ่ม realtime sync
+            loadData();
+            setupRealtimeSync();
+            
+            // Debounced save function (3 วินาที)
+            const debouncedSave = debounce(saveData, 3000);
             
             // เพิ่ม event listeners สำหรับทุก input
             document.querySelectorAll('input[id]:not([type="file"])').forEach(input => {
@@ -5360,7 +5442,7 @@
                     }
                 });
                 if (shouldSave) {
-                    setTimeout(saveData, 100);
+                    setTimeout(saveData, 500);
                 }
             });
             
@@ -5380,21 +5462,34 @@
             // บันทึกก่อนปิดหน้า
             window.addEventListener('beforeunload', saveData);
             
-            // บันทึกทุก 30 วินาที
-            setInterval(saveData, 30000);
+            // บันทึกทุก 60 วินาที (ลดความถี่เพื่อไม่ให้เปลือง Firebase quota)
+            setInterval(saveData, 60000);
             
-            // ฟังก์ชันล้างข้อมูล (เรียกจาก console: clearDashboardData())
+            // ฟังก์ชันล้างข้อมูล
             window.clearDashboardData = function() {
-                if (confirm('ต้องการล้างข้อมูลทั้งหมดหรือไม่?')) {
-                    localStorage.removeItem(STORAGE_KEY);
-                    location.reload();
+                if (confirm('ต้องการล้างข้อมูลทั้งหมดหรือไม่? (จะลบจาก Firebase ด้วย)')) {
+                    database.ref(DATA_PATH).remove()
+                        .then(() => {
+                            console.log('✅ Firebase data cleared');
+                            location.reload();
+                        })
+                        .catch((error) => {
+                            console.error('❌ Error clearing data:', error);
+                        });
                 }
             };
             
-            // ฟังก์ชันบันทึกข้อมูลทันที (เรียกจาก console: saveDashboardData())
-            window.saveDashboardData = saveData;
+            // ฟังก์ชันบันทึกข้อมูลทันที
+            window.saveDashboardData = function() {
+                lastSaveTime = 0; // Reset throttle
+                saveData();
+            };
             
-            console.log('💾 LocalStorage system initialized. Use clearDashboardData() to reset, saveDashboardData() to save now.');
+            // ฟังก์ชันโหลดข้อมูลใหม่
+            window.reloadDashboardData = loadData;
+            
+            console.log('🔥 Firebase Realtime Database initialized');
+            console.log('📌 Commands: clearDashboardData(), saveDashboardData(), reloadDashboardData()');
         });
     </script>
 
