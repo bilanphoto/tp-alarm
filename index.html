@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบติดตามสถานการณ์น้ำ</title>
     
+    <!-- Firebase SDK (ต้องโหลดก่อนสุด) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    
     <!-- External Libraries -->
     <!-- html2canvas - ต้องโหลดก่อน scripts ที่ใช้งาน -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -12,10 +16,6 @@
     <!-- Cropper.js for image cropping -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
-    
-    <!-- Firebase SDK (load synchronously before other scripts) -->
-    <script crossorigin="anonymous" src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script crossorigin="anonymous" src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     
     <style>
         * {
