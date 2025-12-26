@@ -4074,6 +4074,24 @@
                 updatePercentageColor(this);
                 this.style.borderColor = '#3498db';
                 this.style.boxShadow = 'none';
+                
+                // 🔄 วาดเกจใหม่เมื่อเปลี่ยนค่า
+                if (inputId === 'waterVolume' && typeof window.drawGauge === 'function') {
+                    window.drawGauge();
+                }
+                if (inputId === 'waterVolumeLeft' && typeof window.drawGaugeLeft === 'function') {
+                    window.drawGaugeLeft();
+                }
+            });
+            
+            // 🔄 เพิ่ม input event สำหรับ contenteditable
+            div.addEventListener('input', function() {
+                if (inputId === 'waterVolume' && typeof window.drawGauge === 'function') {
+                    window.drawGauge();
+                }
+                if (inputId === 'waterVolumeLeft' && typeof window.drawGaugeLeft === 'function') {
+                    window.drawGaugeLeft();
+                }
             });
             
             div.addEventListener('focus', function() {
