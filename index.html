@@ -2696,13 +2696,14 @@
 
             // อ่านค่าจาก textbox ตาม canvasId
             let currentValue = 101.9; // default
-            let inputId = (canvasId === 'gaugeCanvasLeft') ? 'waterVolumeLeft' : 'waterUse';
+            let inputId = (canvasId === 'gaugeCanvasLeft') ? 'waterVolumeLeft' : 'waterVolume';
             const inputEl = document.getElementById(inputId);
             if (inputEl && inputEl.value) {
                 // ดึงค่า % จาก string เช่น "150.97 (100.48%)" -> 100.48
                 const match = inputEl.value.match(/\(([0-9.]+)%?\)/);
                 if (match) {
                     currentValue = parseFloat(match[1]);
+                    console.log('📊 Gauge reading from', inputId, ':', currentValue + '%');
                 }
             }
             
@@ -4329,20 +4330,17 @@
                     console.log('waterVolumeInput not found!');
                 }
 
-                // เพิ่ม event listener สำหรับ textbox waterUse
+                // เพิ่ม event listener สำหรับ textbox waterUse (บาร์กราฟเท่านั้น)
                 var waterUseInput = document.getElementById('waterUse');
                 if (waterUseInput) {
                     waterUseInput.addEventListener('input', function() {
                         updateBarGauge2();
-                        if (typeof drawGauge === 'function') drawGauge();
                     });
                     waterUseInput.addEventListener('blur', function() {
                         updateBarGauge2();
-                        if (typeof drawGauge === 'function') drawGauge();
                     });
                     waterUseInput.addEventListener('keyup', function(e) {
                         updateBarGauge2();
-                        if (typeof drawGauge === 'function') drawGauge();
                     });
                     // อัพเดทครั้งแรก
                     updateBarGauge2();
@@ -4352,13 +4350,27 @@
                 var waterVolumeLeftInput = document.getElementById('waterVolumeLeft');
                 if (waterVolumeLeftInput) {
                     waterVolumeLeftInput.addEventListener('input', function() {
-                        if (typeof drawGaugeLeft === 'function') drawGaugeLeft();
+                        if (typeof window.drawGaugeLeft === 'function') window.drawGaugeLeft();
                     });
                     waterVolumeLeftInput.addEventListener('blur', function() {
-                        if (typeof drawGaugeLeft === 'function') drawGaugeLeft();
+                        if (typeof window.drawGaugeLeft === 'function') window.drawGaugeLeft();
                     });
                     waterVolumeLeftInput.addEventListener('keyup', function(e) {
-                        if (typeof drawGaugeLeft === 'function') drawGaugeLeft();
+                        if (typeof window.drawGaugeLeft === 'function') window.drawGaugeLeft();
+                    });
+                }
+                
+                // เพิ่ม event listener สำหรับ textbox waterVolume (เกจฝั่งขวา)
+                var waterVolumeInput = document.getElementById('waterVolume');
+                if (waterVolumeInput) {
+                    waterVolumeInput.addEventListener('input', function() {
+                        if (typeof window.drawGauge === 'function') window.drawGauge();
+                    });
+                    waterVolumeInput.addEventListener('blur', function() {
+                        if (typeof window.drawGauge === 'function') window.drawGauge();
+                    });
+                    waterVolumeInput.addEventListener('keyup', function(e) {
+                        if (typeof window.drawGauge === 'function') window.drawGauge();
                     });
                 }
 
