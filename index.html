@@ -5420,12 +5420,6 @@
             loadData();
             setupRealtimeSync();
             
-            // บันทึกก่อนปิดหน้า หรือ รีเฟรช เท่านั้น
-            window.addEventListener('beforeunload', function() {
-                lastSaveTime = 0; // Reset throttle
-                saveData();
-            });
-            
             // ฟังก์ชันล้างข้อมูล
             window.clearDashboardData = function() {
                 if (confirm('ต้องการล้างข้อมูลทั้งหมดหรือไม่? (จะลบจาก Firebase ด้วย)')) {
