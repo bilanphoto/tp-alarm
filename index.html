@@ -2718,12 +2718,18 @@
             let currentValue = 101.9; // default
             let inputId = (canvasId === 'gaugeCanvasLeft') ? 'waterVolumeLeft' : 'waterVolume';
             const inputEl = document.getElementById(inputId);
-            if (inputEl && inputEl.value) {
-                // ดึงค่า % จาก string เช่น "150.97 (100.48%)" -> 100.48
-                const match = inputEl.value.match(/\(([0-9.]+)%?\)/);
-                if (match) {
-                    currentValue = parseFloat(match[1]);
-                    console.log('📊 Gauge reading from', inputId, ':', currentValue + '%');
+            if (inputEl) {
+                // รองรับทั้ง input.value และ div.textContent (contenteditable)
+                let textValue = inputEl.value || inputEl.textContent || inputEl.innerText || '';
+                textValue = textValue.trim();
+                
+                if (textValue) {
+                    // ดึงค่า % จาก string เช่น "150.97 (100.48%)" -> 100.48
+                    const match = textValue.match(/\(([0-9.]+)%?\)/);
+                    if (match) {
+                        currentValue = parseFloat(match[1]);
+                        console.log('📊 Gauge reading from', inputId, ':', currentValue + '%');
+                    }
                 }
             }
             
