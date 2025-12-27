@@ -1227,7 +1227,7 @@
         }
 
         .bar-gauge-track-new {
-            background: #f0f0f0;
+            background: #e0e0e0;
             height: 25px;
             border-radius: 12px;
             overflow: hidden;
@@ -1237,7 +1237,19 @@
 
         .bar-gauge-fill-new {
             height: 100%;
-            background: linear-gradient(90deg, #e74c3c 0%, #e67e22 15%, #f1c40f 25%, #f1c40f 42%, #27ae60 55%, #2ecc71 100%);
+            /* Smooth Gradient: Red -> Orange -> Yellow -> Light Green -> Green */
+            background: linear-gradient(90deg, 
+                #e74c3c 0%, 
+                #e74c3c 10%,
+                #e67e22 20%, 
+                #f39c12 25%,
+                #f1c40f 35%, 
+                #d4ac0d 42%,
+                #27ae60 55%, 
+                #2ecc71 70%,
+                #2ecc71 100%
+            );
+            background-position: left;
             transition: width 0.5s ease;
             border-radius: 12px;
             display: flex;
@@ -1419,12 +1431,16 @@
                         <svg viewBox="0 -5 200 145" style="width: 100%; height: auto;">
                             <defs>
                                 <!-- Smooth Gradient: Red -> Yellow -> Green (0-30 Red, 30-50 Yellow, 50+ Green) -->
+                                <!-- Smooth Gradient: Red -> Orange -> Yellow -> Light Green -> Green -->
                                 <linearGradient id="semicircleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
                                     <stop offset="0%" style="stop-color:#e74c3c" />
-                                    <stop offset="15%" style="stop-color:#e67e22" />
-                                    <stop offset="25%" style="stop-color:#f1c40f" />
-                                    <stop offset="42%" style="stop-color:#f1c40f" />
+                                    <stop offset="10%" style="stop-color:#e74c3c" />
+                                    <stop offset="20%" style="stop-color:#e67e22" />
+                                    <stop offset="25%" style="stop-color:#f39c12" />
+                                    <stop offset="35%" style="stop-color:#f1c40f" />
+                                    <stop offset="42%" style="stop-color:#d4ac0d" />
                                     <stop offset="55%" style="stop-color:#27ae60" />
+                                    <stop offset="70%" style="stop-color:#2ecc71" />
                                     <stop offset="100%" style="stop-color:#2ecc71" />
                                 </linearGradient>
                                 <filter id="shadow1">
@@ -4587,10 +4603,15 @@
                         semicirclePath.setAttribute('stroke-dasharray', dashArray + ' ' + pathLength);
                     }
                     
-                    // อัพเดทบาร์กราฟอันแรก (ใช้ gradient แล้ว ไม่ต้องเปลี่ยนสี)
+                    // อัพเดทบาร์กราฟอันแรก - ไล่สี gradient ตาม range
                     if (barGaugeFill) {
                         var barWidth = (percentValue / 120) * 100;
                         barGaugeFill.style.width = barWidth + '%';
+                        // Scale gradient ให้ตรงกับ track width
+                        if (barWidth > 0) {
+                            var bgSize = (100 / barWidth) * 100;
+                            barGaugeFill.style.backgroundSize = bgSize + '% 100%';
+                        }
                     }
                     if (barGaugeText) {
                         barGaugeText.textContent = parseFloat(percentValue).toFixed(2) + '%';
@@ -4655,10 +4676,15 @@
                     var percent = parsePercentFromInput(text);
                     
                     if (percent !== null) {
-                        // อัพเดทบาร์กราฟที่ 2 (ใช้ gradient แล้ว ไม่ต้องเปลี่ยนสี)
+                        // อัพเดทบาร์กราฟที่ 2 - ไล่สี gradient ตาม range
                         if (barGaugeFill2) {
                             var barWidth = (percent / 120) * 100;
                             barGaugeFill2.style.width = barWidth + '%';
+                            // Scale gradient ให้ตรงกับ track width
+                            if (barWidth > 0) {
+                                var bgSize = (100 / barWidth) * 100;
+                                barGaugeFill2.style.backgroundSize = bgSize + '% 100%';
+                            }
                         }
                         if (barGaugeText2) {
                             barGaugeText2.textContent = parseFloat(percent).toFixed(2) + '%';
