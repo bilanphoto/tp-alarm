@@ -142,11 +142,9 @@
             object-fit: contain;
         }
 
-        /* Modal Popup Styles */
+        /* Modal Popup Styles - Unified */
         .modal {
             display: none;
-            justify-content: center;
-            align-items: center;
             position: fixed;
             z-index: 1000;
             left: 0;
@@ -1755,9 +1753,11 @@
                 
             </div>
 
-            <div class="gauge-card" id="gaugeCard6" style="padding: 10px; background: #ffffff; cursor: pointer;">
+            <div class="gauge-card" id="gaugeCard6" style="padding: 10px; background: #ffffff; cursor: pointer; position: relative;">
+                <!-- Hidden image for uploaded content -->
+                <img id="gaugeCard6Image" class="gauge-uploaded-image" style="width: 100%; height: 100%; object-fit: fill; border-radius: 12px; display: none; position: absolute; top: 0; left: 0; z-index: 10;">
                 <!-- Operating Window Alarms Card -->
-                <div style="width: 100%; height: 100%; display: flex; flex-direction: column; font-family: Arial, sans-serif;">
+                <div id="gaugeCard6Content" style="width: 100%; height: 100%; display: flex; flex-direction: column; font-family: Arial, sans-serif;">
                     <!-- Header -->
                     <div style="display: flex; justify-content: flex-end; margin-bottom: 5px;">
                         <div style="background: #f5a623; color: #333; padding: 5px 15px; font-weight: bold; font-size: 12px; border-radius: 3px;">
@@ -1822,7 +1822,9 @@
                 
             </div>
 
-            <div class="gauge-card" id="gaugeCard8" style="padding: 10px; background: #ffffff; cursor: pointer;">
+            <div class="gauge-card" id="gaugeCard8" style="padding: 10px; background: #ffffff; cursor: pointer; position: relative;">
+                <!-- Hidden image for uploaded content -->
+                <img id="gaugeCard8Image" class="gauge-uploaded-image" style="width: 100%; height: 100%; object-fit: fill; border-radius: 12px; display: none; position: absolute; top: 0; left: 0; z-index: 10;">
                 <!-- IOW/SOW/ROW Table -->
                 <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
                     <thead>
@@ -2467,6 +2469,250 @@
         </div>
     </div>
     -->
+
+    <!-- ============================================================
+         UNIFIED MODAL SYSTEM & FILE HANDLER
+         ลดโค้ดซ้ำซ้อนโดยใช้ระบบ modal และ file handler เดียวกัน
+         ============================================================ -->
+    <script>
+        // =============================================
+        // 🎯 UNIFIED MODAL CONFIGURATION
+        // =============================================
+        window.ModalConfig = {
+            // Modal configurations by type
+            configs: {
+                'container1': {
+                    title: '💧 ระบบติดตามสถานการณ์น้ำ',
+                    websiteUrl: 'https://swoc.rid.go.th/index.html',
+                    websiteName: 'เว็บชลประทาน'
+                },
+                'gauge': {
+                    title: '🔔 Top alarm',
+                    websiteUrl: 'http://exaq-gsp1/ExaquantumARA',
+                    websiteName: 'Exaquantum'
+                },
+                'topAlarm': {
+                    title: '🔔 Top Alarm',
+                    websiteUrl: 'http://10.4.20.100/pag/Pages/HomePage.aspx',
+                    websiteName: 'Exaquantum'
+                },
+                'container2Gauge': {
+                    title: '🔔 Capture/Upload รูปภาพ',
+                    websiteUrl: 'http://exaq-gsp1/ExaquantumARA',
+                    websiteName: 'Exaquantum'
+                }
+            },
+            
+            // Current state
+            currentType: null,
+            currentTarget: null
+        };
+        
+        // =============================================
+        // 🎯 UNIFIED FILE HANDLER
+        // =============================================
+        window.UnifiedFileHandler = {
+            // Configuration
+            MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
+            SUPPORTED_TYPES: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+            
+            // Validate file
+            validateFile: function(file) {
+                if (!file.type.startsWith('image/')) {
+                    return { valid: false, error: '❌ กรุณาเลือกไฟล์รูปภาพเท่านั้น' };
+                }
+                if (file.size > this.MAX_FILE_SIZE) {
+                    return { valid: false, error: '❌ ไฟล์มีขนาดใหญ่เกิน 10MB' };
+                }
+                return { valid: true };
+            },
+            
+            // Read file as Data URL
+            readAsDataURL: function(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onerror = (e) => reject(e);
+                    reader.readAsDataURL(file);
+                });
+            },
+            
+            // Handle file for specific target
+            handleFile: async function(file, targetType, targetId) {
+                const validation = this.validateFile(file);
+                if (!validation.valid) {
+                    if (typeof showStatus === 'function') {
+                        showStatus(validation.error, 'error');
+                    }
+                    return false;
+                }
+                
+                try {
+                    const dataUrl = await this.readAsDataURL(file);
+                    this.applyImage(dataUrl, targetType, targetId);
+                    return true;
+                } catch (error) {
+                    console.error('Error reading file:', error);
+                    if (typeof showStatus === 'function') {
+                        showStatus('❌ เกิดข้อผิดพลาดในการอ่านไฟล์', 'error');
+                    }
+                    return false;
+                }
+            },
+            
+            // Apply image to target
+            applyImage: function(dataUrl, targetType, targetId) {
+                console.log('Applying image to:', targetType, targetId);
+                
+                switch(targetType) {
+                    case 'container1-left':
+                        this.setContainer1Image('left', dataUrl);
+                        break;
+                    case 'container1-right':
+                        this.setContainer1Image('right', dataUrl);
+                        break;
+                    case 'container2':
+                        if (typeof window.setContainer2CardImage === 'function') {
+                            window.setContainer2CardImage(targetId, dataUrl);
+                        }
+                        break;
+                    case 'container3':
+                        this.setContainer3Image(targetId, dataUrl);
+                        break;
+                    case 'gauge':
+                        if (typeof handleGaugeFile !== 'undefined') {
+                            // Create a file-like object for compatibility
+                            fetch(dataUrl)
+                                .then(res => res.blob())
+                                .then(blob => {
+                                    const file = new File([blob], 'image.png', { type: 'image/png' });
+                                    handleGaugeFile(file);
+                                });
+                        }
+                        break;
+                    default:
+                        console.warn('Unknown target type:', targetType);
+                }
+                
+                // Trigger save
+                if (typeof window.syncToFirebase === 'function') {
+                    setTimeout(() => window.syncToFirebase(), 500);
+                }
+            },
+            
+            // Set Container 1 image
+            setContainer1Image: function(side, dataUrl) {
+                if (side === 'left') {
+                    const img = document.getElementById('capturedImageLeft');
+                    const container = document.getElementById('gaugeContainerLeft');
+                    if (img) {
+                        img.src = dataUrl;
+                        img.style.display = 'block';
+                    }
+                    if (container) container.classList.add('has-capture');
+                } else {
+                    const img = document.getElementById('capturedImage');
+                    const container = document.getElementById('gaugeContainer');
+                    if (img) {
+                        img.src = dataUrl;
+                        img.style.display = 'block';
+                    }
+                    if (container) container.classList.add('has-capture');
+                }
+            },
+            
+            // Set Container 3 image
+            setContainer3Image: function(cardId, dataUrl) {
+                const card = document.getElementById(cardId);
+                if (!card) return;
+                
+                let img = card.querySelector('img');
+                if (!img) {
+                    img = document.createElement('img');
+                    img.id = cardId + 'Image';
+                    img.style.cssText = 'width: 100%; height: 100%; object-fit: fill; border-radius: 12px;';
+                    card.appendChild(img);
+                }
+                img.src = dataUrl;
+                img.style.display = 'block';
+                card.style.padding = '0';
+            }
+        };
+        
+        // =============================================
+        // 🎯 IMAGE PERSISTENCE HELPER
+        // =============================================
+        window.ImagePersistence = {
+            // Get all gauge images for saving
+            getAllImages: function() {
+                const images = {};
+                const imageIds = [
+                    'capturedImageLeft', 'capturedImage',
+                    'gaugeCard1Image', 'gaugeCard2Image', 'gaugeCard3Image', 'gaugeCard4Image',
+                    'gaugeCard5Image', 'gaugeCard6Image', 'gaugeCard7Image', 'gaugeCard8Image'
+                ];
+                
+                imageIds.forEach(id => {
+                    const img = document.getElementById(id);
+                    if (img && img.src && img.src.startsWith('data:')) {
+                        images[id] = img.src;
+                    }
+                });
+                
+                // Also check for inline images in cards
+                ['gaugeCard5', 'gaugeCard6', 'gaugeCard7', 'gaugeCard8'].forEach(cardId => {
+                    const card = document.getElementById(cardId);
+                    if (card) {
+                        const img = card.querySelector('img');
+                        if (img && img.src && img.src.startsWith('data:')) {
+                            images[cardId + '_img'] = img.src;
+                        }
+                    }
+                });
+                
+                return images;
+            },
+            
+            // Restore all images from data
+            restoreImages: function(imageData) {
+                if (!imageData) return;
+                
+                Object.keys(imageData).forEach(id => {
+                    if (id.endsWith('_img')) {
+                        const cardId = id.replace('_img', '');
+                        const card = document.getElementById(cardId);
+                        if (card) {
+                            let img = card.querySelector('img');
+                            if (img) {
+                                img.src = imageData[id];
+                                img.style.display = 'block';
+                            }
+                        }
+                    } else {
+                        const img = document.getElementById(id);
+                        if (img) {
+                            img.src = imageData[id];
+                            img.style.display = 'block';
+                            
+                            // Handle container classes
+                            if (id === 'capturedImageLeft') {
+                                const container = document.getElementById('gaugeContainerLeft');
+                                if (container) container.classList.add('has-capture');
+                            }
+                            if (id === 'capturedImage') {
+                                const container = document.getElementById('gaugeContainer');
+                                if (container) container.classList.add('has-capture');
+                            }
+                        }
+                    }
+                });
+                
+                console.log('✅ Restored', Object.keys(imageData).length, 'images');
+            }
+        };
+        
+        console.log('✅ Unified Modal System & File Handler loaded');
+    </script>
 
     <script>
         // Browser Detection and CSS Adjustment
@@ -3590,17 +3836,22 @@
                 // ตรวจสอบว่าเป็น Container 3 (gaugeCard5 หรือ gaugeCard7) หรือไม่
                 if (window.currentContainer3CardIndex === 5 || window.currentContainer3CardIndex === 7) {
                     const cardId = 'gaugeCard' + window.currentContainer3CardIndex;
+                    const imgId = cardId + 'Image';
                     targetCard = document.getElementById(cardId);
                     console.log('Container 3 card:', cardId, targetCard);
                     
                     if (targetCard) {
-                        // หา img element ที่มีอยู่แล้ว
-                        let img = targetCard.querySelector('img');
+                        // หา img element ที่มี ID อยู่แล้ว
+                        let img = document.getElementById(imgId) || targetCard.querySelector('img');
                         if (img) {
                             img.src = e.target.result;
+                            img.style.display = 'block';
+                            // ตั้ง ID ถ้ายังไม่มี
+                            if (!img.id) img.id = imgId;
                         } else {
-                            // สร้าง img ใหม่ถ้าไม่มี
+                            // สร้าง img ใหม่ถ้าไม่มี (พร้อม ID)
                             img = document.createElement('img');
+                            img.id = imgId;
                             img.style.cssText = 'width: 100%; height: 100%; object-fit: fill; cursor: pointer;';
                             targetCard.innerHTML = '';
                             targetCard.appendChild(img);
@@ -3608,6 +3859,11 @@
                         }
                         targetCard.style.padding = '0';
                         targetCard.style.overflow = 'hidden';
+                        
+                        // Trigger save to Firebase
+                        if (typeof window.syncToFirebase === 'function') {
+                            setTimeout(() => window.syncToFirebase(), 500);
+                        }
                     }
                     // รีเซ็ต index หลังใช้งาน
                     window.currentContainer3CardIndex = null;
@@ -4759,10 +5015,24 @@
             // ===== SET IMAGE FUNCTION (Global) =====
             window.setTopAlarmImage = function(imageSrc) {
                 const card6 = document.getElementById('gaugeCard6');
+                const img6 = document.getElementById('gaugeCard6Image');
+                const content6 = document.getElementById('gaugeCard6Content');
+                
                 if (card6) {
-                    card6.innerHTML = `<img src="${imageSrc}" style="width: 100%; height: 100%; object-fit: fill; cursor: pointer;" alt="Top Alarm">`;
+                    if (img6) {
+                        img6.src = imageSrc;
+                        img6.style.display = 'block';
+                    }
+                    if (content6) {
+                        content6.style.display = 'none';
+                    }
                     card6.style.padding = '0';
                     card6.style.overflow = 'hidden';
+                    
+                    // Trigger save
+                    if (typeof window.syncToFirebase === 'function') {
+                        setTimeout(() => window.syncToFirebase(), 500);
+                    }
                 }
             }
 
@@ -5304,19 +5574,52 @@
                         }
                     });
                     
-                    // บันทึกรูปภาพจาก img elements ที่มี id และเป็น data URL
-                    // หมายเหตุ: Firebase มี limit 10MB ต่อ node, รูปใหญ่อาจไม่ได้
+                    // =============================================
+                    // 🖼️ บันทึกรูปภาพทุกเกจ - ENHANCED VERSION
+                    // =============================================
+                    const IMAGE_SIZE_LIMIT = 1000000; // 1MB limit per image
+                    
+                    // รายการ image IDs ที่ต้องบันทึก
+                    const imageIdsToSave = [
+                        // Container 1
+                        'capturedImageLeft',
+                        'capturedImage',
+                        // Container 2 - gaugeCard1-4
+                        'gaugeCard1Image',
+                        'gaugeCard2Image',
+                        'gaugeCard3Image',
+                        'gaugeCard4Image',
+                        // Container 3 - gaugeCard5-8
+                        'gaugeCard5Image',
+                        'gaugeCard6Image',
+                        'gaugeCard7Image',
+                        'gaugeCard8Image'
+                    ];
+                    
+                    // บันทึกรูปภาพจาก image IDs ที่กำหนด
+                    imageIdsToSave.forEach(imgId => {
+                        const img = document.getElementById(imgId);
+                        if (img && img.src && img.src.startsWith('data:')) {
+                            if (img.src.length < IMAGE_SIZE_LIMIT) {
+                                data.images[imgId] = img.src;
+                                console.log(`💾 Saved image: ${imgId} (${Math.round(img.src.length/1024)}KB)`);
+                            } else {
+                                console.warn(`⚠️ Image too large: ${imgId} (${Math.round(img.src.length/1024)}KB)`);
+                            }
+                        }
+                    });
+                    
+                    // บันทึกรูปภาพอื่นๆ ที่มี id และเป็น data URL
                     document.querySelectorAll('img[id]').forEach(img => {
-                        if (img.id && img.src && img.src.startsWith('data:')) {
-                            // จำกัดขนาดรูป (ไม่เกิน 500KB)
-                            if (img.src.length < 500000) {
+                        if (img.id && img.src && img.src.startsWith('data:') && !data.images[img.id]) {
+                            if (img.src.length < IMAGE_SIZE_LIMIT) {
                                 data.images[img.id] = img.src;
                             }
                         }
                     });
                     
                     // บันทึก contenteditable tables ใน gauge cards
-                    ['gaugeCard6', 'gaugeCard7', 'gaugeCard8'].forEach(cardId => {
+                    ['gaugeCard4', 'gaugeCard6', 'gaugeCard7', 'gaugeCard8'].forEach(cardId => {
                         const card = document.getElementById(cardId);
                         if (card) {
                             const cells = card.querySelectorAll('td[contenteditable="true"]');
@@ -5328,11 +5631,20 @@
                             }
                             // บันทึกรูปใน card ถ้ามี (จำกัดขนาด)
                             const img = card.querySelector('img');
-                            if (img && img.src && img.src.startsWith('data:') && img.src.length < 500000) {
+                            if (img && img.src && img.src.startsWith('data:') && img.src.length < IMAGE_SIZE_LIMIT) {
                                 data.images[cardId + '_img'] = img.src;
                             }
                         }
                     });
+                    
+                    // บันทึก gaugeCard5 image (ซึ่งเป็น img โดยตรงใน card)
+                    const gaugeCard5 = document.getElementById('gaugeCard5');
+                    if (gaugeCard5) {
+                        const img5 = gaugeCard5.querySelector('img');
+                        if (img5 && img5.src && img5.src.startsWith('data:') && img5.src.length < IMAGE_SIZE_LIMIT) {
+                            data.images['gaugeCard5_img'] = img5.src;
+                        }
+                    }
                     
                     // บันทึกไป Firebase
                     window.firebaseDatabase.ref(DATA_PATH).set(data)
@@ -5485,27 +5797,98 @@
                         }, 100);
                     }
                     
-                    // โหลดรูปภาพ
+                    // =============================================
+                    // 🖼️ โหลดรูปภาพทุกเกจ - ENHANCED VERSION
+                    // =============================================
                     if (data.images) {
+                        console.log('📷 Loading images:', Object.keys(data.images).length, 'images found');
+                        
                         Object.keys(data.images).forEach(id => {
+                            // Handle card images with _img suffix
                             if (id.endsWith('_img')) {
                                 const cardId = id.replace('_img', '');
                                 const card = document.getElementById(cardId);
                                 if (card) {
-                                    const existingImg = card.querySelector('img');
-                                    if (existingImg) {
+                                    let existingImg = card.querySelector('img');
+                                    
+                                    // สำหรับ gaugeCard5 ที่มี img อยู่แล้ว
+                                    if (cardId === 'gaugeCard5' && existingImg) {
                                         existingImg.src = data.images[id];
+                                        console.log(`✅ Loaded image for ${cardId}`);
+                                    } else if (existingImg) {
+                                        existingImg.src = data.images[id];
+                                        console.log(`✅ Loaded image for ${cardId}`);
                                     }
                                 }
                             } else {
+                                // Handle direct image IDs
                                 const img = document.getElementById(id);
                                 if (img) {
                                     img.src = data.images[id];
                                     img.style.display = 'block';
+                                    console.log(`✅ Loaded image: ${id}`);
                                     
+                                    // เพิ่ม has-capture class สำหรับ gauge containers (Container 1)
+                                    if (id === 'capturedImageLeft') {
+                                        const container = document.getElementById('gaugeContainerLeft');
+                                        if (container) container.classList.add('has-capture');
+                                    }
+                                    if (id === 'capturedImage') {
+                                        const container = document.getElementById('gaugeContainer');
+                                        if (container) container.classList.add('has-capture');
+                                    }
+                                    
+                                    // จัดการ gaugeCard4 placeholder
                                     if (id === 'gaugeCard4Image') {
                                         const placeholder = document.getElementById('gaugeCard4Placeholder');
                                         if (placeholder) placeholder.style.display = 'none';
+                                    }
+                                    
+                                    // จัดการ gaugeCard1-4 (Container 2)
+                                    if (['gaugeCard1Image', 'gaugeCard2Image', 'gaugeCard3Image'].includes(id)) {
+                                        const cardNum = id.replace('gaugeCard', '').replace('Image', '');
+                                        const card = document.getElementById('gaugeCard' + cardNum);
+                                        if (card && typeof window.setContainer2CardImage === 'function') {
+                                            // Hide original elements and show image
+                                            const title = card.querySelector('.gauge-title');
+                                            const subtitle = card.querySelector('.gauge-subtitle');
+                                            const canvas = card.querySelector('.gauge-canvas');
+                                            const percentage = card.querySelector('.gauge-percentage');
+                                            const note = card.querySelector('.gauge-note');
+                                            
+                                            if (title) title.style.display = 'none';
+                                            if (subtitle) subtitle.style.display = 'none';
+                                            if (canvas) canvas.style.display = 'none';
+                                            if (percentage) percentage.style.display = 'none';
+                                            if (note) note.style.display = 'none';
+                                            
+                                            card.style.padding = '0';
+                                            card.style.position = 'relative';
+                                            card.style.overflow = 'hidden';
+                                        }
+                                    }
+                                    
+                                    // จัดการ gaugeCard6Image (Container 3 - Operating Window Alarms)
+                                    if (id === 'gaugeCard6Image') {
+                                        const content6 = document.getElementById('gaugeCard6Content');
+                                        const card6 = document.getElementById('gaugeCard6');
+                                        if (content6) content6.style.display = 'none';
+                                        if (card6) {
+                                            card6.style.padding = '0';
+                                            card6.style.overflow = 'hidden';
+                                        }
+                                    }
+                                    
+                                    // จัดการ gaugeCard8Image (Container 3 - IOW/SOW/ROW Table)
+                                    if (id === 'gaugeCard8Image') {
+                                        const card8 = document.getElementById('gaugeCard8');
+                                        if (card8) {
+                                            // ซ่อน table content
+                                            const table = card8.querySelector('table');
+                                            if (table) table.style.display = 'none';
+                                            card8.style.padding = '0';
+                                            card8.style.overflow = 'hidden';
+                                        }
                                     }
                                 }
                             }
@@ -5647,13 +6030,36 @@
                         }
                     });
                     
-                    document.querySelectorAll('img[id]').forEach(img => {
-                        if (img.id && img.src && img.src.startsWith('data:') && img.src.length < 500000) {
-                            data.images[img.id] = img.src;
+                    // =============================================
+                    // 🖼️ บันทึกรูปภาพทุกเกจ - SYNC VERSION
+                    // =============================================
+                    const SYNC_IMAGE_LIMIT = 1000000; // 1MB limit
+                    
+                    // รายการ image IDs ที่ต้องบันทึก
+                    const syncImageIds = [
+                        'capturedImageLeft', 'capturedImage',
+                        'gaugeCard1Image', 'gaugeCard2Image', 'gaugeCard3Image', 'gaugeCard4Image',
+                        'gaugeCard5Image', 'gaugeCard6Image', 'gaugeCard7Image', 'gaugeCard8Image'
+                    ];
+                    
+                    syncImageIds.forEach(imgId => {
+                        const img = document.getElementById(imgId);
+                        if (img && img.src && img.src.startsWith('data:') && img.src.length < SYNC_IMAGE_LIMIT) {
+                            data.images[imgId] = img.src;
                         }
                     });
                     
-                    ['gaugeCard6', 'gaugeCard7', 'gaugeCard8'].forEach(cardId => {
+                    // บันทึกรูปอื่นๆ
+                    document.querySelectorAll('img[id]').forEach(img => {
+                        if (img.id && img.src && img.src.startsWith('data:') && !data.images[img.id]) {
+                            if (img.src.length < SYNC_IMAGE_LIMIT) {
+                                data.images[img.id] = img.src;
+                            }
+                        }
+                    });
+                    
+                    // บันทึก tables และ card images
+                    ['gaugeCard4', 'gaugeCard5', 'gaugeCard6', 'gaugeCard7', 'gaugeCard8'].forEach(cardId => {
                         const card = document.getElementById(cardId);
                         if (card) {
                             const cells = card.querySelectorAll('td[contenteditable="true"]');
@@ -5664,7 +6070,7 @@
                                 });
                             }
                             const img = card.querySelector('img');
-                            if (img && img.src && img.src.startsWith('data:') && img.src.length < 500000) {
+                            if (img && img.src && img.src.startsWith('data:') && img.src.length < SYNC_IMAGE_LIMIT) {
                                 data.images[cardId + '_img'] = img.src;
                             }
                         }
