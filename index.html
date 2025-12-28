@@ -4426,16 +4426,22 @@
             // แทนที่ input ด้วย div
             input.parentNode.replaceChild(div, input);
             
-            // เลือกฟังก์ชัน updateColor ตาม inputId
-            // ทั้ง waterVolume และ waterVolumeLeft ใช้ range เดียวกับเกจ: 0-30 แดง, 31-50 เหลือง, >50 เขียว
-            const updateColorFunc = window.updatePercentageColorGaugeRange || updatePercentageColor;
+            // ฟังก์ชันเลือกและเรียก updateColor
+            // ใช้ range เดียวกับเกจ: 0-30 แดง, 31-50 เหลือง, >50 เขียว
+            function applyColor(element) {
+                if (typeof window.updatePercentageColorGaugeRange === 'function') {
+                    window.updatePercentageColorGaugeRange(element);
+                } else {
+                    updatePercentageColor(element);
+                }
+            }
             
             // อัพเดทสีครั้งแรก
-            updateColorFunc(div);
+            applyColor(div);
             
             // เพิ่ม event listener สำหรับการเปลี่ยนแปลง (เฉพาะตอน blur - คลิกออกจากช่อง)
             div.addEventListener('blur', function() {
-                updateColorFunc(this);
+                applyColor(this);
                 this.style.borderColor = '#3498db';
                 this.style.boxShadow = 'none';
                 
@@ -6009,10 +6015,10 @@
                                 value = value.replace(/[\r\n]+/g, '');
                                 el.textContent = value;
                                 
-                                // อัพเดทสีสำหรับ waterVolume, waterVolumeLeft
+                                // อัพเดทสีสำหรับ waterVolume, waterVolumeLeft (ใช้ range เดียวกับเกจ)
                                 if (id === 'waterVolume' || id === 'waterVolumeLeft') {
-                                    if (typeof updatePercentageColor === 'function') {
-                                        updatePercentageColor(el);
+                                    if (typeof window.updatePercentageColorGaugeRange === 'function') {
+                                        window.updatePercentageColorGaugeRange(el);
                                     }
                                 }
                             }
