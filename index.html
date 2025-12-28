@@ -1414,16 +1414,19 @@
                 <div class="water-volume-input" style="display: flex; align-items: center; gap: 10px;">
                     <label for="waterVolume">ปริมาณน้ำที่ใช้ได้ (ล้าน ลบ.ม.) :</label>
                     <input type="text" id="waterVolume" placeholder="กรอกปริมาณน้ำ" value="150.97 (100.48%)">
-                    <span id="toggleGaugeBtn" style="font-size: 1.5em; cursor: pointer; color: #3498db; user-select: none;">▼</span>
+                    <!-- ปุ่ม toggle ซ่อนไว้ -->
+                    <span id="toggleGaugeBtn" style="display: none; font-size: 1.5em; cursor: pointer; color: #3498db; user-select: none;">▼</span>
+                    <button id="fetchDataBtn" style="padding: 8px 10px; font-size: 20px; background: #95a5a6; color: white; border: none; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; line-height: 1;" title="ดึงข้อมูลจากกรมชลประทาน">🔄</button>
                 </div>
 
+                <!-- ซ่อนบรรทัดปริมาณน้ำใช้การ แต่ยังเก็บ element ไว้สำหรับเก็บค่า -->
                 <div class="water-volume-input" id="waterUseRow" style="display: none; align-items: center; gap: 10px;">
                     <label for="waterUse" style="font-size: 18px;">ปริมาณน้ำใช้การ (ล้านลบ.ม.) :</label>
                     <input type="text" id="waterUse" placeholder="กรอกปริมาณน้ำ" value="139.74 (93.00%)" style="width: 180px; font-size: 18px; padding: 6px;">
                 </div>
 
                 <!-- New Gauge from gauge2.html -->
-                <div class="gauge-card-new" id="gaugeCardNew" style="cursor: pointer;" title="คลิกเพื่อเปิดเว็บไซต์กรมชลประทาน">
+                <div class="gauge-card-new" id="gaugeCardNew">
                     <h3 style="text-align: center; font-size: 1.4em; font-weight: 700; color: #333; margin-bottom: 15px;">
                         เขื่อนหนองปลาไหล
                     </h3>
@@ -1472,7 +1475,7 @@
                     <!-- Bar Gauge 1 -->
                     <div class="bar-gauge-container-new">
                         <div style="font-size: 0.85em; color: #666; font-weight: 400; margin-bottom: 8px;">
-                            ปริมาณน้ำในอ่าง (ล้านลบ.ม.) <span id="barGaugeLabel1" style="font-weight: 600; color: #333;">155.21 (94.78%)</span>
+                            ปริมาณน้ำใช้การ (ล้านลบ.ม.) <span id="barGaugeLabel1" style="font-weight: 600; color: #333;">155.21 (94.78%)</span>
                         </div>
                         <div class="bar-gauge-track-new">
                             <div class="bar-gauge-fill-new" id="barGaugeFill" style="width: 78.98%;">
@@ -1484,7 +1487,7 @@
                     <!-- Bar Gauge 2 -->
                     <div class="bar-gauge-container-new">
                         <div style="font-size: 0.85em; color: #666; font-weight: 400; margin-bottom: 8px;">
-                            ปริมาณน้ำใช้การ (ล้านลบ.ม.) <span id="barGaugeLabel2" style="font-weight: 600; color: #333;">141.71 (94.32%)</span>
+                            ปริมาณน้ำในอ่าง (ล้านลบ.ม.) <span id="barGaugeLabel2" style="font-weight: 600; color: #333;">141.71 (94.32%)</span>
                         </div>
                         <div class="bar-gauge-track-new">
                             <div class="bar-gauge-fill-new" id="barGaugeFill2" style="width: 78.6%;">
@@ -4365,6 +4368,38 @@
             }
         }
         
+        // ฟังก์ชันเปลี่ยนสี % ตาม range เดียวกับเกจ (0-30 แดง, 31-50 เหลือง, >50 เขียว)
+        function updatePercentageColorGaugeRange(inputElement) {
+            const value = inputElement.textContent || inputElement.value || '';
+            
+            if (!value) return;
+            
+            const percentMatch = value.match(/\(([0-9.]+)%\)/);
+            
+            if (percentMatch) {
+                const percentValue = parseFloat(percentMatch[1]);
+                let color;
+                
+                // กำหนดสีตาม range เดียวกับเกจ: 0-30 แดง, 31-50 เหลือง, >50 เขียว
+                if (percentValue <= 30) {
+                    color = '#e74c3c'; // สีแดง
+                } else if (percentValue <= 50) {
+                    color = '#f1c40f'; // สีเหลือง
+                } else {
+                    color = '#2ecc71'; // สีเขียว
+                }
+                
+                // แยกส่วนข้อความและส่วน %
+                const textPart = value.substring(0, value.indexOf('('));
+                const percentPart = value.substring(value.indexOf('('));
+                
+                // สร้าง HTML ใหม่โดยใช้ span เพื่อกำหนดสี
+                inputElement.innerHTML = textPart + '<span style="color: ' + color + '; font-weight: bold;">' + percentPart + '</span>';
+            }
+        }
+        // ทำให้เป็น global function
+        window.updatePercentageColorGaugeRange = updatePercentageColorGaugeRange;
+        
         // ฟังก์ชันแปลง input เป็น contenteditable div
         function convertToColoredInput(inputId) {
             const input = document.getElementById(inputId);
@@ -4394,12 +4429,16 @@
             // แทนที่ input ด้วย div
             input.parentNode.replaceChild(div, input);
             
+            // เลือกฟังก์ชัน updateColor ตาม inputId
+            // ทั้ง waterVolume และ waterVolumeLeft ใช้ range เดียวกับเกจ: 0-30 แดง, 31-50 เหลือง, >50 เขียว
+            const updateColorFunc = window.updatePercentageColorGaugeRange || updatePercentageColor;
+            
             // อัพเดทสีครั้งแรก
-            updatePercentageColor(div);
+            updateColorFunc(div);
             
             // เพิ่ม event listener สำหรับการเปลี่ยนแปลง (เฉพาะตอน blur - คลิกออกจากช่อง)
             div.addEventListener('blur', function() {
-                updatePercentageColor(this);
+                updateColorFunc(this);
                 this.style.borderColor = '#3498db';
                 this.style.boxShadow = 'none';
                 
@@ -4639,6 +4678,136 @@
                     }
                 };
 
+                // =============================================
+                // 🌊 FETCH DATA FROM RID API (กรมชลประทาน)
+                // =============================================
+                window.fetchRIDData = async function() {
+                    const fetchBtn = document.getElementById('fetchDataBtn');
+                    const waterVolumeInput = document.getElementById('waterVolume');
+                    const waterUseInput = document.getElementById('waterUse');
+                    
+                    // เปลี่ยนสถานะปุ่ม - กำลังโหลด
+                    if (fetchBtn) {
+                        fetchBtn.disabled = true;
+                        fetchBtn.innerHTML = '⏳';
+                        fetchBtn.style.background = '#95a5a6'; // สีเทา
+                    }
+                    
+                    try {
+                        // ใช้ CORS proxy เนื่องจาก API ไม่อนุญาต cross-origin
+                        const apiUrl = 'https://app.rid.go.th/reservoir/api/dam/public';
+                        
+                        const response = await fetch(apiUrl);
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        
+                        const data = await response.json();
+                        
+                        // ค้นหาเขื่อนหนองปลาไหล (id: 100504)
+                        let nongPlaiLaiDam = null;
+                        for (const region of data.data) {
+                            for (const dam of region.dam) {
+                                if (dam.id === '100504') {
+                                    nongPlaiLaiDam = dam;
+                                    break;
+                                }
+                            }
+                            if (nongPlaiLaiDam) break;
+                        }
+                        
+                        if (nongPlaiLaiDam) {
+                            // ปริมาณน้ำในอ่าง (volume) และ % ความจุ (percent_storage)
+                            const volume = nongPlaiLaiDam.volume;
+                            const percentStorage = nongPlaiLaiDam.percent_storage;
+                            
+                            // คำนวณปริมาณน้ำใช้การ
+                            // active_storage = ความจุใช้งาน, dead_storage = ความจุตาย
+                            const activeStorage = nongPlaiLaiDam.active_storage;
+                            const deadStorage = nongPlaiLaiDam.dead_storage;
+                            const usableWater = Math.max(0, volume - deadStorage);
+                            const usablePercent = (usableWater / activeStorage * 100).toFixed(2);
+                            
+                            // =============================================
+                            // สลับข้อมูลตามที่ต้องการ:
+                            // - ปริมาณน้ำใช้การ (จาก API) → ใส่ช่อง "ปริมาณน้ำที่ใช้ได้" ของเพจ
+                            // - ปริมาณน้ำในอ่าง (จาก API) → ใส่ช่อง "ปริมาณน้ำใช้การ" ของเพจ
+                            // =============================================
+                            
+                            // อัปเดต textbox "ปริมาณน้ำที่ใช้ได้" ด้วย ปริมาณน้ำใช้การ จาก API
+                            const usableText = usableWater.toFixed(2) + ' (' + usablePercent + '%)';
+                            if (waterVolumeInput) {
+                                if (waterVolumeInput.tagName === 'INPUT') {
+                                    waterVolumeInput.value = usableText;
+                                } else {
+                                    waterVolumeInput.textContent = usableText;
+                                }
+                                // อัพเดทสี % ตาม range เดียวกับเกจ
+                                if (typeof window.updatePercentageColorGaugeRange === 'function') {
+                                    window.updatePercentageColorGaugeRange(waterVolumeInput);
+                                }
+                            }
+                            
+                            // อัปเดต textbox "ปริมาณน้ำใช้การ" ด้วย ปริมาณน้ำในอ่าง จาก API
+                            const volumeText = volume.toFixed(2) + ' (' + percentStorage.toFixed(2) + '%)';
+                            if (waterUseInput) {
+                                if (waterUseInput.tagName === 'INPUT') {
+                                    waterUseInput.value = volumeText;
+                                } else {
+                                    waterUseInput.textContent = volumeText;
+                                }
+                            }
+                            
+                            // อัปเดตเกจด้วย ปริมาณน้ำใช้การ (usablePercent)
+                            if (typeof window.updateNewGauge === 'function') {
+                                window.updateNewGauge(parseFloat(usablePercent), usableText);
+                            }
+                            if (typeof window.updateBarGauge2 === 'function') {
+                                window.updateBarGauge2();
+                            }
+                            
+                            // เปลี่ยนปุ่มเป็นสีเขียว (สำเร็จ)
+                            if (fetchBtn) {
+                                fetchBtn.style.background = '#27ae60';
+                                fetchBtn.innerHTML = '🔄';
+                                fetchBtn.disabled = false;
+                            }
+                            
+                            // Sync to Firebase
+                            if (typeof window.syncToFirebase === 'function') {
+                                setTimeout(window.syncToFirebase, 500);
+                            }
+                            
+                            console.log('✅ ดึงข้อมูลเขื่อนหนองปลาไหลสำเร็จ:', nongPlaiLaiDam);
+                        } else {
+                            throw new Error('ไม่พบข้อมูลเขื่อนหนองปลาไหล');
+                        }
+                        
+                    } catch (error) {
+                        console.error('❌ Error fetching RID data:', error);
+                        // เปลี่ยนปุ่มเป็นสีแดง (ล้มเหลว)
+                        if (fetchBtn) {
+                            fetchBtn.style.background = '#e74c3c';
+                            fetchBtn.innerHTML = '🔄';
+                            fetchBtn.disabled = false;
+                        }
+                    }
+                };
+                
+                // เพิ่ม event listener สำหรับปุ่มดึงข้อมูล
+                const fetchDataBtn = document.getElementById('fetchDataBtn');
+                if (fetchDataBtn) {
+                    fetchDataBtn.addEventListener('click', window.fetchRIDData);
+                    
+                    // Hover effect
+                    fetchDataBtn.addEventListener('mouseenter', function() {
+                        this.style.transform = 'scale(1.05)';
+                        this.style.boxShadow = '0 4px 15px rgba(52, 152, 219, 0.4)';
+                    });
+                    fetchDataBtn.addEventListener('mouseleave', function() {
+                        this.style.transform = 'scale(1)';
+                        this.style.boxShadow = 'none';
+                    });
+                }
+
                 // ฟังก์ชันดึงค่า % จาก textbox
                 function parsePercentFromInput(text) {
                     if (!text || typeof text !== 'string') return null;
@@ -4767,13 +4936,13 @@
                     });
                 }
 
-                // คลิกที่เกจเพื่อเปิดเว็บไซต์กรมชลประทาน
-                var gaugeCardNew = document.getElementById('gaugeCardNew');
-                if (gaugeCardNew) {
-                    gaugeCardNew.addEventListener('click', function() {
-                        window.open('https://swoc.rid.go.th/index.html', '_blank');
-                    });
-                }
+                // ปิดฟังก์ชันคลิกเพื่อเปิดลิงค์ของเกจฝั่งขวา
+                // var gaugeCardNew = document.getElementById('gaugeCardNew');
+                // if (gaugeCardNew) {
+                //     gaugeCardNew.addEventListener('click', function() {
+                //         window.open('https://swoc.rid.go.th/index.html', '_blank');
+                //     });
+                // }
             }, 100); // รอ 100ms ให้ convertToColoredInput ทำงานเสร็จ
         });
     </script>
