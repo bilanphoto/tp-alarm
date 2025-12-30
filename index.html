@@ -4560,6 +4560,8 @@
             // ลบ span ออก
             document.body.removeChild(span);
         }
+        // ทำให้เป็น global function
+        window.autoResizeInput = autoResizeInput;
         
         // เริ่มต้นเมื่อโหลดหน้าเสร็จ
         document.addEventListener('DOMContentLoaded', function() {
@@ -5988,6 +5990,12 @@
                             if (el) {
                                 if (el.tagName === 'INPUT') {
                                     el.value = data.inputs[id];
+                                    // ถ้าเป็น top-alarm-input ให้ปรับขนาดตามข้อความ
+                                    if (el.classList.contains('top-alarm-input')) {
+                                        if (typeof window.autoResizeInput === 'function') {
+                                            window.autoResizeInput(el);
+                                        }
+                                    }
                                 } else if (el.hasAttribute('contenteditable')) {
                                     // waterVolume, waterVolumeLeft ถูกแปลงเป็น div แล้ว
                                     el.textContent = data.inputs[id];
