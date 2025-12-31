@@ -44,6 +44,41 @@
             box-sizing: border-box;
         }
 
+        /* ❄️ Snow Effect */
+        .snowflake {
+            position: fixed;
+            top: -10px;
+            color: white;
+            font-size: 1em;
+            text-shadow: 0 0 5px rgba(255,255,255,0.8);
+            pointer-events: none;
+            z-index: 9999;
+            animation: fall linear forwards;
+        }
+        
+        @keyframes fall {
+            0% {
+                opacity: 1;
+                transform: translateY(0) rotate(0deg);
+            }
+            100% {
+                opacity: 0.3;
+                transform: translateY(100vh) rotate(360deg);
+            }
+        }
+        
+        @keyframes sway {
+            0%, 100% {
+                margin-left: 0;
+            }
+            25% {
+                margin-left: 20px;
+            }
+            75% {
+                margin-left: -20px;
+            }
+        }
+
         body {
             font-family: 'Sarabun', 'Tahoma', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -6355,6 +6390,41 @@
             
             console.log('🔥 Firebase Realtime Database initialized');
             console.log('📌 Commands: clearDashboardData(), saveDashboardData(), reloadDashboardData()');
+        }
+    </script>
+
+    <!-- ❄️ Snow Effect Script -->
+    <script>
+        // สร้างหิมะตก
+        function createSnowflake() {
+            const snowflakes = ['❄', '❅', '❆', '✻', '✼', '❉', '✿', '•'];
+            const snowflake = document.createElement('div');
+            snowflake.className = 'snowflake';
+            snowflake.innerHTML = snowflakes[Math.floor(Math.random() * snowflakes.length)];
+            snowflake.style.left = Math.random() * 100 + 'vw';
+            snowflake.style.fontSize = (Math.random() * 15 + 10) + 'px';
+            snowflake.style.opacity = Math.random() * 0.7 + 0.3;
+            
+            const duration = Math.random() * 5 + 5; // 5-10 วินาที
+            snowflake.style.animationDuration = duration + 's';
+            
+            // เพิ่ม sway animation
+            snowflake.style.animation = `fall ${duration}s linear forwards, sway ${duration/2}s ease-in-out infinite`;
+            
+            document.body.appendChild(snowflake);
+            
+            // ลบหิมะหลังจากตกเสร็จ
+            setTimeout(() => {
+                snowflake.remove();
+            }, duration * 1000);
+        }
+        
+        // สร้างหิมะทุก 200ms
+        setInterval(createSnowflake, 200);
+        
+        // สร้างหิมะเริ่มต้น
+        for (let i = 0; i < 30; i++) {
+            setTimeout(createSnowflake, i * 100);
         }
     </script>
 
