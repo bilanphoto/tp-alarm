@@ -56,11 +56,10 @@
 
         /* ===== Sidebar Menu ===== */
         .sidebar {
-            width: 220px;
-            min-width: 220px;
+            width: 70px;
             background: linear-gradient(180deg, #1e3a5f 0%, #0d1b2a 100%);
             min-height: 100vh;
-            padding: 20px 0;
+            padding: 15px 0;
             box-shadow: 4px 0 20px rgba(0,0,0,0.3);
             display: flex;
             flex-direction: column;
@@ -69,34 +68,22 @@
             top: 0;
             z-index: 1000;
             transition: all 0.3s ease;
+            overflow: hidden;
         }
 
-        /* Sidebar Collapsed */
-        .sidebar.collapsed {
-            width: 70px;
-            min-width: 70px;
+        /* Sidebar Expanded - overlay บน Container */
+        .sidebar.expanded {
+            width: 220px;
         }
 
-        .sidebar.collapsed .sidebar-title .title-text,
-        .sidebar.collapsed .menu-text {
-            display: none;
-        }
-
-        .sidebar.collapsed .sidebar-header {
-            padding: 15px 10px;
-        }
-
-        .sidebar.collapsed .sidebar-header h2 {
-            justify-content: center;
-        }
-
-        .sidebar.collapsed .sidebar-menu a {
-            justify-content: center;
-            padding: 14px 10px;
-        }
-
-        .sidebar.collapsed .sidebar-menu a .icon {
-            margin: 0;
+        /* Header with Hamburger + GSP in row */
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 15px;
+            gap: 10px;
         }
 
         /* Hamburger Button */
@@ -108,7 +95,7 @@
             display: flex;
             flex-direction: column;
             gap: 5px;
-            margin-right: 10px;
+            flex-shrink: 0;
         }
 
         .hamburger-btn span {
@@ -124,25 +111,23 @@
             background: #00f2fe;
         }
 
-        .sidebar-header {
-            padding: 15px 20px;
-            display: flex;
-            align-items: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            margin-bottom: 20px;
-        }
-
         .sidebar-header h2 {
             color: #4facfe;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            white-space: nowrap;
+            overflow: hidden;
         }
 
-        .sidebar-header .logo {
-            font-size: 2rem;
+        /* ซ่อนข้อความเมื่อย่อ */
+        .sidebar .menu-text,
+        .sidebar .title-text {
+            display: none;
+        }
+
+        .sidebar.expanded .menu-text,
+        .sidebar.expanded .title-text {
+            display: inline;
         }
 
         .sidebar-menu {
@@ -153,26 +138,31 @@
         }
 
         .sidebar-menu li {
-            margin: 5px 10px;
+            margin: 5px 8px;
         }
 
         .sidebar-menu a {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 14px 20px;
+            padding: 12px;
             color: rgba(255,255,255,0.8);
             text-decoration: none;
             border-radius: 12px;
             transition: all 0.3s ease;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 500;
+            justify-content: center;
+        }
+
+        .sidebar.expanded .sidebar-menu a {
+            justify-content: flex-start;
+            padding: 12px 15px;
         }
 
         .sidebar-menu a:hover {
             background: rgba(79, 172, 254, 0.2);
             color: #4facfe;
-            transform: translateX(5px);
         }
 
         .sidebar-menu a.active {
@@ -183,39 +173,26 @@
 
         .sidebar-menu a .icon {
             font-size: 1.3rem;
-            width: 30px;
+            min-width: 30px;
             text-align: center;
         }
 
         .sidebar-menu .menu-divider {
             height: 1px;
             background: rgba(255,255,255,0.1);
-            margin: 15px 20px;
+            margin: 12px 10px;
         }
 
-        .sidebar-menu .menu-label {
-            padding: 10px 20px;
-            color: rgba(255,255,255,0.4);
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* Main Content Area */
+        /* Main Content Area - margin คงที่ */
         .main-wrapper {
             flex: 1;
-            margin-left: 220px;
+            margin-left: 70px;
             padding: 20px;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            transition: margin-left 0.3s ease;
-        }
-
-        .main-wrapper.expanded {
-            margin-left: 70px;
         }
 
         .container {
@@ -223,11 +200,11 @@
             border-radius: 20px;
             padding: 25px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 1600px;
+            max-width: 1700px;
             width: 100%;
             aspect-ratio: 16 / 9;
             height: auto;
-            max-height: calc((100vw - 260px) * 9 / 16);
+            max-height: calc((100vw - 110px) * 9 / 16);
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -1501,12 +1478,12 @@
     <!-- Sidebar Menu -->
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleSidebar()">
+            <button class="hamburger-btn" onclick="toggleSidebar()">
                 <span></span>
                 <span></span>
                 <span></span>
             </button>
-            <h2 class="sidebar-title"><span class="logo">💧</span> <span class="title-text">GSP</span></h2>
+            <h2><span class="title-text">GSP</span></h2>
         </div>
         <ul class="sidebar-menu">
             <li>
@@ -1564,7 +1541,7 @@
     </nav>
 
     <!-- Main Content Wrapper -->
-    <div class="main-wrapper" id="mainWrapper">
+    <div class="main-wrapper">
 
     <div class="container">
         <div class="status-message" id="statusMessage"></div>
@@ -4690,9 +4667,7 @@
         // ===== Toggle Sidebar =====
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
-            const mainWrapper = document.getElementById('mainWrapper');
-            sidebar.classList.toggle('collapsed');
-            mainWrapper.classList.toggle('expanded');
+            sidebar.classList.toggle('expanded');
         }
 
         // ===== Sidebar Menu Function =====
@@ -4729,7 +4704,7 @@
             // Show based on menu selection
             switch(menuId) {
                 case 'gsp1-process':
-                    // แสดง Container 2 อย่างเดียว (ไม่แสดง Container 1)
+                    // แสดง Container 2 อย่างเดียว
                     if (container2) container2.style.display = 'flex';
                     if (saveBtnContainer2) saveBtnContainer2.style.display = 'block';
                     // เลือก dropdown GSP1 = Process
