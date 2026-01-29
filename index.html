@@ -67,16 +67,14 @@
             left: 0;
             top: 0;
             z-index: 1000;
-            transition: all 0.3s ease;
+            transition: width 0.3s ease;
             overflow: hidden;
         }
 
-        /* Sidebar Expanded - overlay บน Container */
         .sidebar.expanded {
             width: 220px;
         }
 
-        /* Header with Hamburger + GSP in row */
         .sidebar-header {
             display: flex;
             align-items: center;
@@ -86,7 +84,6 @@
             gap: 10px;
         }
 
-        /* Hamburger Button */
         .hamburger-btn {
             background: none;
             border: none;
@@ -116,10 +113,8 @@
             font-size: 1.3rem;
             margin: 0;
             white-space: nowrap;
-            overflow: hidden;
         }
 
-        /* ซ่อนข้อความเมื่อย่อ */
         .sidebar .menu-text,
         .sidebar .title-text {
             display: none;
@@ -183,7 +178,7 @@
             margin: 12px 10px;
         }
 
-        /* Main Content Area - margin คงที่ */
+        /* Main Content Area */
         .main-wrapper {
             flex: 1;
             margin-left: 70px;
@@ -200,11 +195,11 @@
             border-radius: 20px;
             padding: 25px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 1700px;
+            max-width: 1600px;
             width: 100%;
             aspect-ratio: 16 / 9;
             height: auto;
-            max-height: calc((100vw - 110px) * 9 / 16);
+            max-height: calc((100vw - 260px) * 9 / 16);
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -1487,13 +1482,13 @@
         </div>
         <ul class="sidebar-menu">
             <li>
-                <a href="#" class="active" data-menu="gsp1-process" onclick="showMenu('gsp1-process')">
+                <a href="#" class="active" data-menu="gsp1-process" onclick="showMenu('gsp1-process'); return false;">
                     <span class="icon">⚙️</span>
                     <span class="menu-text">GSP1 [Process]</span>
                 </a>
             </li>
             <li>
-                <a href="#" data-menu="gsp1-utility" onclick="showMenu('gsp1-utility')">
+                <a href="#" data-menu="gsp1-utility" onclick="showMenu('gsp1-utility'); return false;">
                     <span class="icon">🔧</span>
                     <span class="menu-text">GSP1 [Utility]</span>
                 </a>
@@ -1502,37 +1497,37 @@
             <div class="menu-divider"></div>
             
             <li>
-                <a href="#" data-menu="gsp2" onclick="showMenu('gsp2')">
+                <a href="#" data-menu="gsp2" onclick="showMenu('gsp2'); return false;">
                     <span class="icon">🏭</span>
                     <span class="menu-text">GSP2</span>
                 </a>
             </li>
             <li>
-                <a href="#" data-menu="gsp3" onclick="showMenu('gsp3')">
+                <a href="#" data-menu="gsp3" onclick="showMenu('gsp3'); return false;">
                     <span class="icon">🏭</span>
                     <span class="menu-text">GSP3</span>
                 </a>
             </li>
             <li>
-                <a href="#" data-menu="gsp5" onclick="showMenu('gsp5')">
+                <a href="#" data-menu="gsp5" onclick="showMenu('gsp5'); return false;">
                     <span class="icon">🏭</span>
                     <span class="menu-text">GSP5</span>
                 </a>
             </li>
             <li>
-                <a href="#" data-menu="gsp6" onclick="showMenu('gsp6')">
+                <a href="#" data-menu="gsp6" onclick="showMenu('gsp6'); return false;">
                     <span class="icon">🏭</span>
                     <span class="menu-text">GSP6</span>
                 </a>
             </li>
             <li>
-                <a href="#" data-menu="esp" onclick="showMenu('esp')">
+                <a href="#" data-menu="esp" onclick="showMenu('esp'); return false;">
                     <span class="icon">⚡</span>
                     <span class="menu-text">ESP</span>
                 </a>
             </li>
             <li>
-                <a href="#" data-menu="gppp" onclick="showMenu('gppp')">
+                <a href="#" data-menu="gppp" onclick="showMenu('gppp'); return false;">
                     <span class="icon">🔋</span>
                     <span class="menu-text">GPPP</span>
                 </a>
@@ -4666,29 +4661,53 @@
     <script>
         // ===== Toggle Sidebar =====
         function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('expanded');
+            var sidebar = document.getElementById('sidebar');
+            if (sidebar) {
+                sidebar.classList.toggle('expanded');
+            }
         }
+
+        // ===== ตัวแปรเก็บเมนูปัจจุบัน =====
+        window.currentMenu = null;  // เริ่มต้นเป็น null
+        window.isFirstLoad = true;  // flag สำหรับการโหลดครั้งแรก
 
         // ===== Sidebar Menu Function =====
         function showMenu(menuId) {
+            console.log('showMenu called:', menuId);
+            
+            // บันทึกค่าเมนูเดิมก่อน (ไม่บันทึกถ้าเป็นการโหลดครั้งแรก)
+            if (window.currentMenu && window.currentMenu !== menuId && !window.isFirstLoad) {
+                saveMenuData(window.currentMenu);
+            }
+            
+            window.isFirstLoad = false;  // ไม่ใช่การโหลดครั้งแรกแล้ว
+            window.currentMenu = menuId;
+            
+            // 💾 จำเมนูปัจจุบันลง localStorage
+            try {
+                localStorage.setItem('gsp_current_menu', menuId);
+                console.log('💾 Saved current menu to localStorage:', menuId);
+            } catch(e) {
+                console.log('localStorage not available');
+            }
+
             // Get elements
-            const container1 = document.querySelector('.container:not(#container2):not(#container3)');
-            const container2 = document.getElementById('container2');
-            const container3 = document.getElementById('container3');
-            const saveBtn = document.getElementById('saveBtn');
-            const saveBtnContainer2 = document.getElementById('saveBtnContainer2');
-            const saveBtnContainer3 = document.getElementById('saveBtnContainer3');
-            const gsp1Select = document.getElementById('gsp1Select');
-            const plantSelect = document.getElementById('gsp1Select3');
-            const leftColumn = document.querySelector('.left-column');
-            const rightColumn = document.querySelector('.right-column');
+            var container1 = document.querySelector('.container:not(#container2):not(#container3)');
+            var container2 = document.getElementById('container2');
+            var container3 = document.getElementById('container3');
+            var saveBtn = document.getElementById('saveBtn');
+            var saveBtnContainer2 = document.getElementById('saveBtnContainer2');
+            var saveBtnContainer3 = document.getElementById('saveBtnContainer3');
+            var gsp1Select = document.getElementById('gsp1Select');
+            var plantSelect = document.getElementById('gsp1Select3');
+            var leftColumn = document.querySelector('.left-column');
+            var rightColumn = document.querySelector('.right-column');
 
             // Update sidebar active state
-            document.querySelectorAll('.sidebar-menu a').forEach(link => {
+            document.querySelectorAll('.sidebar-menu a').forEach(function(link) {
                 link.classList.remove('active');
             });
-            const activeLink = document.querySelector(`.sidebar-menu a[data-menu="${menuId}"]`);
+            var activeLink = document.querySelector('.sidebar-menu a[data-menu="' + menuId + '"]');
             if (activeLink) activeLink.classList.add('active');
 
             // Hide all containers first
@@ -4702,85 +4721,454 @@
             if (rightColumn) rightColumn.style.display = 'none';
 
             // Show based on menu selection
-            switch(menuId) {
-                case 'gsp1-process':
-                    // แสดง Container 2 อย่างเดียว
-                    if (container2) container2.style.display = 'flex';
-                    if (saveBtnContainer2) saveBtnContainer2.style.display = 'block';
-                    // เลือก dropdown GSP1 = Process
-                    if (gsp1Select) {
-                        for (let i = 0; i < gsp1Select.options.length; i++) {
-                            if (gsp1Select.options[i].value === 'Process') {
-                                gsp1Select.selectedIndex = i;
-                                break;
-                            }
+            if (menuId === 'gsp1-process') {
+                if (container2) container2.style.display = 'flex';
+                if (saveBtnContainer2) saveBtnContainer2.style.display = 'block';
+                if (gsp1Select) {
+                    gsp1Select.value = 'Process';
+                    gsp1Select.dispatchEvent(new Event('change'));
+                }
+            } else if (menuId === 'gsp1-utility') {
+                if (container1) container1.style.display = 'flex';
+                if (container2) container2.style.display = 'flex';
+                if (leftColumn) leftColumn.style.display = 'flex';
+                if (rightColumn) rightColumn.style.display = 'flex';
+                if (saveBtn && saveBtn.parentElement) saveBtn.parentElement.style.display = 'block';
+                if (saveBtnContainer2) saveBtnContainer2.style.display = 'block';
+                if (gsp1Select) {
+                    gsp1Select.value = 'Utility';
+                    gsp1Select.dispatchEvent(new Event('change'));
+                }
+            } else {
+                // gsp2, gsp3, gsp5, gsp6, esp, gppp
+                if (container3) container3.style.display = 'flex';
+                if (saveBtnContainer3) saveBtnContainer3.style.display = 'block';
+                
+                var menuToValue = {
+                    'gsp2': 'GSP 2',
+                    'gsp3': 'GSP 3',
+                    'gsp5': 'GSP 5',
+                    'gsp6': 'GSP 6',
+                    'esp': 'ESP',
+                    'gppp': 'GPPP'
+                };
+                
+                var targetValue = menuToValue[menuId];
+                if (plantSelect && targetValue) {
+                    for (var i = 0; i < plantSelect.options.length; i++) {
+                        if (plantSelect.options[i].value === targetValue) {
+                            plantSelect.selectedIndex = i;
+                            break;
                         }
-                        gsp1Select.dispatchEvent(new Event('change'));
                     }
-                    break;
-                    
-                case 'gsp1-utility':
-                    // แสดง Container 1 และ 2
-                    if (container1) container1.style.display = 'flex';
-                    if (container2) container2.style.display = 'flex';
-                    if (leftColumn) leftColumn.style.display = 'flex';
-                    if (rightColumn) rightColumn.style.display = 'flex';
-                    if (saveBtn && saveBtn.parentElement) saveBtn.parentElement.style.display = 'block';
-                    if (saveBtnContainer2) saveBtnContainer2.style.display = 'block';
-                    // เลือก dropdown GSP1 = Utility
-                    if (gsp1Select) {
-                        for (let i = 0; i < gsp1Select.options.length; i++) {
-                            if (gsp1Select.options[i].value === 'Utility') {
-                                gsp1Select.selectedIndex = i;
-                                break;
-                            }
-                        }
-                        gsp1Select.dispatchEvent(new Event('change'));
-                    }
-                    break;
-                    
-                case 'gsp2':
-                case 'gsp3':
-                case 'gsp5':
-                case 'gsp6':
-                case 'esp':
-                case 'gppp':
-                    // แสดง Container 3 อย่างเดียว
-                    if (container3) container3.style.display = 'flex';
-                    if (saveBtnContainer3) saveBtnContainer3.style.display = 'block';
-                    
-                    // Map menuId to dropdown value
-                    const menuToValue = {
-                        'gsp2': 'GSP 2',
-                        'gsp3': 'GSP 3',
-                        'gsp5': 'GSP 5',
-                        'gsp6': 'GSP 6',
-                        'esp': 'ESP',
-                        'gppp': 'GPPP'
-                    };
-                    
-                    const targetValue = menuToValue[menuId];
-                    
-                    if (plantSelect && targetValue) {
-                        for (let i = 0; i < plantSelect.options.length; i++) {
-                            if (plantSelect.options[i].value === targetValue) {
-                                plantSelect.selectedIndex = i;
-                                break;
-                            }
-                        }
-                        plantSelect.dispatchEvent(new Event('change'));
-                    }
-                    break;
+                    plantSelect.dispatchEvent(new Event('change'));
+                }
             }
             
-            // Prevent default link behavior
+            // โหลดค่าจาก Firebase
+            setTimeout(function() {
+                loadMenuData(menuId);
+            }, 100);
+            
             return false;
         }
 
+        // ===== Clear ค่าก่อนโหลดข้อมูลใหม่ =====
+        function clearMenuFields(menuId) {
+            console.log('🧹 Clearing fields for:', menuId);
+            
+            if (menuId === 'gsp1-process' || menuId === 'gsp1-utility') {
+                // Clear Container 2
+                var dateInput = document.getElementById('dateInput');
+                var topAlarmInput1 = document.getElementById('topAlarmInput1');
+                var totalAlarmSingle = document.getElementById('totalAlarmSingle');
+                var resultSingle = document.getElementById('resultSingle');
+                
+                if (dateInput) dateInput.value = '';
+                if (topAlarmInput1) topAlarmInput1.value = '';
+                if (totalAlarmSingle) totalAlarmSingle.textContent = '0';
+                if (resultSingle) resultSingle.textContent = '0.00';
+                
+                // Clear images
+                ['gaugeCard1Image', 'gaugeCard2Image', 'gaugeCard3Image', 'gaugeCard4Image'].forEach(function(id) {
+                    var img = document.getElementById(id);
+                    if (img) {
+                        img.src = '';
+                        img.style.display = 'none';
+                    }
+                });
+                
+            } else {
+                // Clear Container 3
+                var dateInput3 = document.getElementById('dateInput3');
+                var topAlarmInput3 = document.getElementById('topAlarmInput3');
+                var totalAlarmSingle3 = document.getElementById('totalAlarmSingle3');
+                var resultSingle3 = document.getElementById('resultSingle3');
+                
+                if (dateInput3) dateInput3.value = '';
+                if (topAlarmInput3) topAlarmInput3.value = '';
+                if (totalAlarmSingle3) totalAlarmSingle3.textContent = '0';
+                if (resultSingle3) resultSingle3.textContent = '0.00';
+                
+                // Clear card images and tables
+                ['gaugeCard5', 'gaugeCard6', 'gaugeCard7', 'gaugeCard8'].forEach(function(cardId) {
+                    var card = document.getElementById(cardId);
+                    if (card) {
+                        var img = card.querySelector('img');
+                        if (img) {
+                            img.src = '';
+                            img.style.display = 'none';
+                        }
+                        var cells = card.querySelectorAll('td[contenteditable="true"]');
+                        cells.forEach(function(cell) {
+                            cell.textContent = '';
+                        });
+                    }
+                });
+            }
+        }
+
+        // ===== บันทึกค่าตามเมนู =====
+        function saveMenuData(menuId) {
+            if (!window.firebaseDatabase) {
+                console.log('Firebase not ready, skip save');
+                return;
+            }
+            
+            console.log('💾 Saving menu:', menuId);
+            showSaveStatus('กำลังบันทึก...');
+            
+            var data = {
+                timestamp: new Date().toISOString(),
+                menuId: menuId,
+                inputs: {},
+                contentEditables: {},
+                images: {},
+                tables: {}
+            };
+            
+            var IMAGE_SIZE_LIMIT = 500000;
+            
+            // บันทึกตาม container
+            if (menuId === 'gsp1-process' || menuId === 'gsp1-utility') {
+                // Container 2 - inputs
+                var inputIds = ['dateInput', 'topAlarmInput1'];
+                inputIds.forEach(function(id) {
+                    var el = document.getElementById(id);
+                    if (el) data.inputs[id] = el.value || '';
+                });
+                
+                // Container 2 - contentEditables
+                var contentIds = ['totalAlarmSingle', 'resultSingle'];
+                contentIds.forEach(function(id) {
+                    var el = document.getElementById(id);
+                    if (el) data.contentEditables[id] = (el.innerText || el.textContent || '').trim();
+                });
+                
+                // Container 2 - Images
+                var imageIds = ['gaugeCard1Image', 'gaugeCard2Image', 'gaugeCard3Image', 'gaugeCard4Image'];
+                imageIds.forEach(function(id) {
+                    var img = document.getElementById(id);
+                    if (img && img.src && img.src.indexOf('data:') === 0 && img.src.length < IMAGE_SIZE_LIMIT) {
+                        data.images[id] = img.src;
+                    }
+                });
+                
+                // Container 2 - Tables (gaugeCard4)
+                var card4 = document.getElementById('gaugeCard4');
+                if (card4) {
+                    var cells = card4.querySelectorAll('td[contenteditable="true"]');
+                    if (cells.length > 0) {
+                        data.tables.gaugeCard4 = [];
+                        cells.forEach(function(cell) {
+                            data.tables.gaugeCard4.push((cell.innerText || cell.textContent || '').trim());
+                        });
+                    }
+                }
+                
+                // Utility: เพิ่ม waterVolume
+                if (menuId === 'gsp1-utility') {
+                    var wv = document.getElementById('waterVolume');
+                    var wvl = document.getElementById('waterVolumeLeft');
+                    if (wv) data.contentEditables.waterVolume = wv.value || wv.textContent || '';
+                    if (wvl) data.contentEditables.waterVolumeLeft = wvl.value || wvl.textContent || '';
+                    
+                    var capturedImg = document.getElementById('capturedImage');
+                    var capturedImgLeft = document.getElementById('capturedImageLeft');
+                    if (capturedImg && capturedImg.src && capturedImg.src.indexOf('data:') === 0 && capturedImg.src.length < IMAGE_SIZE_LIMIT) {
+                        data.images.capturedImage = capturedImg.src;
+                    }
+                    if (capturedImgLeft && capturedImgLeft.src && capturedImgLeft.src.indexOf('data:') === 0 && capturedImgLeft.src.length < IMAGE_SIZE_LIMIT) {
+                        data.images.capturedImageLeft = capturedImgLeft.src;
+                    }
+                }
+                
+            } else {
+                // Container 3 - inputs
+                var inputIds3 = ['dateInput3', 'topAlarmInput3'];
+                inputIds3.forEach(function(id) {
+                    var el = document.getElementById(id);
+                    if (el) data.inputs[id] = el.value || '';
+                });
+                
+                // Container 3 - contentEditables
+                var contentIds3 = ['totalAlarmSingle3', 'resultSingle3'];
+                contentIds3.forEach(function(id) {
+                    var el = document.getElementById(id);
+                    if (el) data.contentEditables[id] = (el.innerText || el.textContent || '').trim();
+                });
+                
+                // Container 3 - Cards (5-8)
+                var cardIds = ['gaugeCard5', 'gaugeCard6', 'gaugeCard7', 'gaugeCard8'];
+                cardIds.forEach(function(cardId) {
+                    var card = document.getElementById(cardId);
+                    if (card) {
+                        // Save image
+                        var img = card.querySelector('img');
+                        if (img && img.src && img.src.indexOf('data:') === 0 && img.src.length < IMAGE_SIZE_LIMIT) {
+                            data.images[cardId + '_img'] = img.src;
+                        }
+                        // Save table cells
+                        var cells = card.querySelectorAll('td[contenteditable="true"]');
+                        if (cells.length > 0) {
+                            data.tables[cardId] = [];
+                            cells.forEach(function(cell) {
+                                data.tables[cardId].push((cell.innerText || cell.textContent || '').trim());
+                            });
+                        }
+                    }
+                });
+            }
+            
+            var menuPath = 'gauge_dashboard/menus/' + menuId;
+            window.firebaseDatabase.ref(menuPath).set(data)
+                .then(function() {
+                    console.log('✅ Saved:', menuId);
+                    showSaveStatus('บันทึกแล้ว ✓');
+                })
+                .catch(function(err) {
+                    console.error('❌ Save error:', err);
+                    showSaveStatus('บันทึกไม่สำเร็จ!');
+                });
+        }
+
+        // ===== โหลดค่าตามเมนู =====
+        function loadMenuData(menuId) {
+            if (!window.firebaseDatabase) {
+                console.log('Firebase not ready, skip load');
+                return;
+            }
+            
+            // Clear ค่าเดิมก่อน
+            clearMenuFields(menuId);
+            
+            console.log('📥 Loading menu:', menuId);
+            
+            var menuPath = 'gauge_dashboard/menus/' + menuId;
+            window.firebaseDatabase.ref(menuPath).once('value')
+                .then(function(snapshot) {
+                    var data = snapshot.val();
+                    if (!data) {
+                        console.log('ℹ️ No data for:', menuId);
+                        return;
+                    }
+                    
+                    console.log('📂 Loaded:', menuId, data.timestamp);
+                    
+                    // Apply inputs
+                    if (data.inputs) {
+                        Object.keys(data.inputs).forEach(function(id) {
+                            var el = document.getElementById(id);
+                            if (el && el.tagName === 'INPUT') {
+                                el.value = data.inputs[id];
+                                // Auto resize if needed
+                                if (el.classList.contains('top-alarm-input') && typeof window.autoResizeInput === 'function') {
+                                    window.autoResizeInput(el);
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Apply contentEditables
+                    if (data.contentEditables) {
+                        Object.keys(data.contentEditables).forEach(function(id) {
+                            var el = document.getElementById(id);
+                            if (el) {
+                                if (el.hasAttribute('contenteditable')) {
+                                    el.textContent = data.contentEditables[id];
+                                } else if (el.tagName === 'INPUT') {
+                                    el.value = data.contentEditables[id];
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Apply images
+                    if (data.images) {
+                        Object.keys(data.images).forEach(function(id) {
+                            if (id.indexOf('_img') > -1) {
+                                // Card image
+                                var cardId = id.replace('_img', '');
+                                var card = document.getElementById(cardId);
+                                if (card) {
+                                    var cardImg = card.querySelector('img');
+                                    if (cardImg) {
+                                        cardImg.src = data.images[id];
+                                        cardImg.style.display = 'block';
+                                    }
+                                }
+                            } else {
+                                var img = document.getElementById(id);
+                                if (img && img.tagName === 'IMG') {
+                                    img.src = data.images[id];
+                                    img.style.display = 'block';
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Apply tables
+                    if (data.tables) {
+                        Object.keys(data.tables).forEach(function(cardId) {
+                            var card = document.getElementById(cardId);
+                            if (card) {
+                                var cells = card.querySelectorAll('td[contenteditable="true"]');
+                                var values = data.tables[cardId];
+                                cells.forEach(function(cell, index) {
+                                    if (values && values[index] !== undefined) {
+                                        cell.textContent = values[index];
+                                    }
+                                });
+                            }
+                        });
+                    }
+                    
+                    // =============================================
+                    // 🔢 Trigger การคำนวณ Alarm/H/Panel หลังโหลดข้อมูล
+                    // =============================================
+                    setTimeout(function() {
+                        if (menuId === 'gsp1-process' || menuId === 'gsp1-utility') {
+                            // Container 2 - คำนวณ resultSingle
+                            var totalAlarmSingle = document.getElementById('totalAlarmSingle');
+                            var resultSingle = document.getElementById('resultSingle');
+                            if (totalAlarmSingle && resultSingle) {
+                                var totalAlarm = parseFloat(totalAlarmSingle.textContent) || 0;
+                                var result = totalAlarm / 24 / 2;
+                                resultSingle.textContent = result.toFixed(2);
+                                console.log('🔢 Calculated Container 2:', totalAlarm, '->', result.toFixed(2));
+                                
+                                // Update checkmark
+                                if (typeof updateLegendCheckmark === 'function') {
+                                    updateLegendCheckmark(result, 2);
+                                }
+                            }
+                        } else {
+                            // Container 3 - คำนวณ resultSingle3
+                            var totalAlarmSingle3 = document.getElementById('totalAlarmSingle3');
+                            var resultSingle3 = document.getElementById('resultSingle3');
+                            if (totalAlarmSingle3 && resultSingle3) {
+                                var totalAlarm3 = parseFloat(totalAlarmSingle3.textContent) || 0;
+                                var result3 = totalAlarm3 / 24 / 2;
+                                resultSingle3.textContent = result3.toFixed(2);
+                                console.log('🔢 Calculated Container 3:', totalAlarm3, '->', result3.toFixed(2));
+                                
+                                // Update checkmark
+                                var prefix = 'check3-';
+                                var checks = ['green', 'yellow', 'olive', 'blue', 'orange'];
+                                checks.forEach(function(color) {
+                                    var el = document.getElementById(prefix + color);
+                                    if (el) el.style.display = 'none';
+                                });
+                                
+                                var targetCheck = null;
+                                if (result3 >= 0 && result3 <= 10) {
+                                    targetCheck = prefix + 'green';
+                                } else if (result3 >= 11 && result3 <= 100) {
+                                    targetCheck = prefix + 'yellow';
+                                } else if (result3 >= 101 && result3 <= 1000) {
+                                    targetCheck = prefix + 'olive';
+                                } else if (result3 >= 1001 && result3 <= 10000) {
+                                    targetCheck = prefix + 'blue';
+                                } else if (result3 > 10000) {
+                                    targetCheck = prefix + 'orange';
+                                }
+                                
+                                if (targetCheck) {
+                                    var checkEl = document.getElementById(targetCheck);
+                                    if (checkEl) checkEl.style.display = 'inline';
+                                }
+                            }
+                        }
+                    }, 100);
+                })
+                .catch(function(err) {
+                    console.error('❌ Load error:', err);
+                });
+        }
+
+        // ===== แสดงสถานะ Save =====
+        function showSaveStatus(message) {
+            var statusEl = document.getElementById('menuSaveStatus');
+            if (!statusEl) {
+                statusEl = document.createElement('div');
+                statusEl.id = 'menuSaveStatus';
+                statusEl.style.cssText = 'position:fixed;top:70px;right:20px;padding:8px 15px;background:#333;color:#fff;border-radius:5px;font-size:12px;z-index:9999;transition:opacity 0.3s;';
+                document.body.appendChild(statusEl);
+            }
+            statusEl.textContent = message;
+            statusEl.style.opacity = '1';
+            
+            setTimeout(function() {
+                statusEl.style.opacity = '0';
+            }, 2000);
+        }
+
+        // ===== Auto-save เมื่อมีการแก้ไข =====
+        var autoSaveTimer = null;
+        function triggerAutoSave() {
+            if (autoSaveTimer) clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(function() {
+                if (window.currentMenu) {
+                    console.log('⏰ Auto-saving:', window.currentMenu);
+                    saveMenuData(window.currentMenu);
+                }
+            }, 2000); // Auto-save หลัง 2 วินาที
+        }
+
+        // ===== Setup Auto-save listeners =====
         document.addEventListener('DOMContentLoaded', function() {
-            // ตั้งค่าเริ่มต้น: แสดง GSP1 [Process]
-            setTimeout(() => {
-                showMenu('gsp1-process');
+            // Listen to input changes
+            document.addEventListener('input', function(e) {
+                var target = e.target;
+                if (target.tagName === 'INPUT' || target.hasAttribute('contenteditable')) {
+                    triggerAutoSave();
+                }
+            });
+            
+            // Listen to blur on contenteditable
+            document.addEventListener('blur', function(e) {
+                var target = e.target;
+                if (target.hasAttribute && target.hasAttribute('contenteditable')) {
+                    triggerAutoSave();
+                }
+            }, true);
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // 📂 โหลดเมนูที่จำไว้จาก localStorage หรือใช้ค่าเริ่มต้น
+            var savedMenu = 'gsp1-process';
+            try {
+                var stored = localStorage.getItem('gsp_current_menu');
+                if (stored) {
+                    savedMenu = stored;
+                    console.log('📂 Restored menu from localStorage:', savedMenu);
+                }
+            } catch(e) {
+                console.log('localStorage not available');
+            }
+            
+            setTimeout(function() {
+                showMenu(savedMenu);
             }, 500);
         });
     </script>
