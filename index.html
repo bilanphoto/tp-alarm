@@ -8,6 +8,9 @@
     - แก้ var เป็น const ใน dateInput handlers  
     - เพิ่ม null checks สำหรับ IOW/SOW/ROW buttons
     - Container 2 & 3: date -1 day logic maintained
+    - เพิ่ม Top Alarm Description textbox (topAlarmDesc1, topAlarmDesc3)
+    - Auto-resize สำหรับ description input (min-width: 200px)
+    - อัพเดต save/load/clear functions รองรับ topAlarmDesc
     
     Known Issues (to fix in future):
     - 10 DOMContentLoaded listeners (ควรรวมเป็น 1)
@@ -1008,6 +1011,36 @@
             box-shadow: 0 0 10px rgba(52, 152, 219, 0.3);
         }
 
+        /* Top Alarm Description Input - ยืดหยุ่นตามข้อความ */
+        .top-alarm-desc-input {
+            padding: 8px 15px;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: normal;
+            min-width: 200px;
+            width: auto;
+            max-width: 600px;
+            transition: all 0.3s ease;
+            background: #ffffff;
+            color: #2c3e50;
+        }
+
+        .top-alarm-desc-input::placeholder {
+            color: #95a5a6;
+            font-style: italic;
+        }
+
+        .top-alarm-desc-input:hover {
+            border-color: #3498db;
+        }
+
+        .top-alarm-desc-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.3);
+        }
+
         /* Second alarm - Orange background */
         #topAlarmInput2 {
             background: #ff9800;
@@ -1727,6 +1760,7 @@
             <div class="top-alarm-item">
                 <label for="topAlarmInput1">Top alarm :</label>
                 <input type="text" id="topAlarmInput1" class="top-alarm-input" placeholder="Enter top alarm">
+                <input type="text" id="topAlarmDesc1" class="top-alarm-desc-input" placeholder="Top alarm description">
             </div>
         </div>
 
@@ -1960,6 +1994,7 @@
             <div class="top-alarm-item">
                 <label for="topAlarmInput3">Top alarm :</label>
                 <input type="text" id="topAlarmInput3" class="top-alarm-input" placeholder="Enter top alarm">
+                <input type="text" id="topAlarmDesc3" class="top-alarm-desc-input" placeholder="Top alarm description">
             </div>
         </div>
 
@@ -4824,11 +4859,13 @@
                 // Clear Container 2
                 var dateInput = document.getElementById('dateInput');
                 var topAlarmInput1 = document.getElementById('topAlarmInput1');
+                var topAlarmDesc1 = document.getElementById('topAlarmDesc1');
                 var totalAlarmSingle = document.getElementById('totalAlarmSingle');
                 var resultSingle = document.getElementById('resultSingle');
                 
                 if (dateInput) dateInput.value = '';
                 if (topAlarmInput1) topAlarmInput1.value = '';
+                if (topAlarmDesc1) topAlarmDesc1.value = '';
                 if (totalAlarmSingle) totalAlarmSingle.textContent = '0';
                 if (resultSingle) resultSingle.textContent = '0.00';
                 
@@ -4845,11 +4882,13 @@
                 // Clear Container 3
                 var dateInput3 = document.getElementById('dateInput3');
                 var topAlarmInput3 = document.getElementById('topAlarmInput3');
+                var topAlarmDesc3 = document.getElementById('topAlarmDesc3');
                 var totalAlarmSingle3 = document.getElementById('totalAlarmSingle3');
                 var resultSingle3 = document.getElementById('resultSingle3');
                 
                 if (dateInput3) dateInput3.value = '';
                 if (topAlarmInput3) topAlarmInput3.value = '';
+                if (topAlarmDesc3) topAlarmDesc3.value = '';
                 if (totalAlarmSingle3) totalAlarmSingle3.textContent = '0';
                 if (resultSingle3) resultSingle3.textContent = '0.00';
                 
@@ -4895,7 +4934,7 @@
             // บันทึกตาม container
             if (menuId === 'gsp1-process' || menuId === 'gsp1-utility') {
                 // Container 2 - inputs
-                var inputIds = ['dateInput', 'topAlarmInput1'];
+                var inputIds = ['dateInput', 'topAlarmInput1', 'topAlarmDesc1'];
                 inputIds.forEach(function(id) {
                     var el = document.getElementById(id);
                     if (el) data.inputs[id] = el.value || '';
@@ -4948,7 +4987,7 @@
                 
             } else {
                 // Container 3 - inputs
-                var inputIds3 = ['dateInput3', 'topAlarmInput3'];
+                var inputIds3 = ['dateInput3', 'topAlarmInput3', 'topAlarmDesc3'];
                 inputIds3.forEach(function(id) {
                     var el = document.getElementById(id);
                     if (el) data.inputs[id] = el.value || '';
@@ -5025,7 +5064,7 @@
                             if (el && el.tagName === 'INPUT') {
                                 el.value = data.inputs[id];
                                 // Auto resize if needed
-                                if (el.classList.contains('top-alarm-input') && typeof window.autoResizeInput === 'function') {
+                                if ((el.classList.contains('top-alarm-input') || el.classList.contains('top-alarm-desc-input')) && typeof window.autoResizeInput === 'function') {
                                     window.autoResizeInput(el);
                                 }
                             }
@@ -5262,8 +5301,9 @@
             // คำนวณความกว้าง + padding เพิ่ม
             const width = span.offsetWidth + 40;
             
-            // กำหนดความกว้างขั้นต่ำ 150px
-            input.style.width = Math.max(150, width) + 'px';
+            // กำหนดความกว้างขั้นต่ำตาม class (desc=200px, alarm=150px)
+            const minWidth = input.classList.contains('top-alarm-desc-input') ? 200 : 150;
+            input.style.width = Math.max(minWidth, width) + 'px';
             
             // ลบ span ออก
             document.body.removeChild(span);
@@ -5273,8 +5313,8 @@
         
         // เริ่มต้นเมื่อโหลดหน้าเสร็จ
         document.addEventListener('DOMContentLoaded', function() {
-            // หา input ทั้งหมดที่มี class top-alarm-input
-            const topAlarmInputs = document.querySelectorAll('.top-alarm-input');
+            // หา input ทั้งหมดที่มี class top-alarm-input และ top-alarm-desc-input
+            const topAlarmInputs = document.querySelectorAll('.top-alarm-input, .top-alarm-desc-input');
             
             topAlarmInputs.forEach(function(input) {
                 // ขยายตอนเริ่มต้น
@@ -6730,8 +6770,8 @@
                             if (el) {
                                 if (el.tagName === 'INPUT') {
                                     el.value = data.inputs[id];
-                                    // ถ้าเป็น top-alarm-input ให้ปรับขนาดตามข้อความ
-                                    if (el.classList.contains('top-alarm-input')) {
+                                    // ถ้าเป็น top-alarm-input หรือ top-alarm-desc-input ให้ปรับขนาดตามข้อความ
+                                    if (el.classList.contains('top-alarm-input') || el.classList.contains('top-alarm-desc-input')) {
                                         if (typeof window.autoResizeInput === 'function') {
                                             window.autoResizeInput(el);
                                         }
