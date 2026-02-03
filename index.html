@@ -3740,13 +3740,27 @@
         alarmResult.textContent = initialResult;
         updateLegendCheckmark(parseFloat(initialResult), 2);
 
-        // ตั้งค่าวันที่เป็นวันปัจจุบัน
+        // ตั้งค่าวันที่เป็นเมื่อวาน (-1 วัน)
         const dateInput = document.getElementById('dateInput');
         const today = new Date();
-        const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const day = String(today.getDate()).padStart(2, '0');
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const year = yesterday.getFullYear();
+        const month = String(yesterday.getMonth() + 1).padStart(2, '0');
+        const day = String(yesterday.getDate()).padStart(2, '0');
         dateInput.value = `${year}-${month}-${day}`;
+        
+        // เมื่อเลือกวันที่ใหม่ ให้ลบ 1 วัน
+        dateInput.addEventListener('change', function() {
+            if (this.value) {
+                var selectedDate = new Date(this.value);
+                selectedDate.setDate(selectedDate.getDate() - 1);
+                var newYear = selectedDate.getFullYear();
+                var newMonth = String(selectedDate.getMonth() + 1).padStart(2, '0');
+                var newDay = String(selectedDate.getDate()).padStart(2, '0');
+                this.value = `${newYear}-${newMonth}-${newDay}`;
+            }
+        });
 
         // ฟังก์ชันวาด Gauge Chart
         function drawGaugeChart(canvasId, percentage) {
@@ -5062,6 +5076,30 @@
                                     updateLegendCheckmark(result, 2);
                                 }
                             }
+                            
+                            // 🎯 GSP1 Utility: วาดเกจใหม่หลังโหลดค่า waterVolume
+                            if (menuId === 'gsp1-utility') {
+                                setTimeout(function() {
+                                    if (typeof window.drawGauge === 'function') {
+                                        window.drawGauge();
+                                        console.log('🔄 Redrawn gaugeCanvas after load');
+                                    }
+                                    if (typeof window.drawGaugeLeft === 'function') {
+                                        window.drawGaugeLeft();
+                                        console.log('🔄 Redrawn gaugeCanvasLeft after load');
+                                    }
+                                    
+                                    // Update color styling ของ input
+                                    var wv = document.getElementById('waterVolume');
+                                    var wvl = document.getElementById('waterVolumeLeft');
+                                    if (wv && typeof window.updatePercentageColorGaugeRange === 'function') {
+                                        window.updatePercentageColorGaugeRange(wv);
+                                    }
+                                    if (wvl && typeof window.updatePercentageColorGaugeRange === 'function') {
+                                        window.updatePercentageColorGaugeRange(wvl);
+                                    }
+                                }, 50);
+                            }
                         } else {
                             // Container 3 - คำนวณ resultSingle3
                             var totalAlarmSingle3 = document.getElementById('totalAlarmSingle3');
@@ -5656,12 +5694,26 @@
             // =============================================
             const dateInput3 = document.getElementById('dateInput3');
             if (dateInput3) {
-                // ตั้งค่าวันที่ปัจจุบัน
+                // ตั้งค่าวันที่เป็นเมื่อวาน (-1 วัน)
                 const today = new Date();
-                const year = today.getFullYear();
-                const month = String(today.getMonth() + 1).padStart(2, '0');
-                const day = String(today.getDate()).padStart(2, '0');
+                const yesterday = new Date(today);
+                yesterday.setDate(yesterday.getDate() - 1);
+                const year = yesterday.getFullYear();
+                const month = String(yesterday.getMonth() + 1).padStart(2, '0');
+                const day = String(yesterday.getDate()).padStart(2, '0');
                 dateInput3.value = `${year}-${month}-${day}`;
+                
+                // เมื่อเลือกวันที่ใหม่ ให้ลบ 1 วัน
+                dateInput3.addEventListener('change', function() {
+                    if (this.value) {
+                        var selectedDate = new Date(this.value);
+                        selectedDate.setDate(selectedDate.getDate() - 1);
+                        var newYear = selectedDate.getFullYear();
+                        var newMonth = String(selectedDate.getMonth() + 1).padStart(2, '0');
+                        var newDay = String(selectedDate.getDate()).padStart(2, '0');
+                        this.value = `${newYear}-${newMonth}-${newDay}`;
+                    }
+                });
             }
             
             // =============================================
