@@ -1,4 +1,20 @@
 <!DOCTYPE html>
+<!--
+    =============================================
+    Dashboard v36 - Code Cleanup & Bug Fixes
+    =============================================
+    Changelog v36:
+    - รวม gaugeModal duplicate click handlers (2→1)
+    - แก้ var เป็น const ใน dateInput handlers  
+    - เพิ่ม null checks สำหรับ IOW/SOW/ROW buttons
+    - Container 2 & 3: date -1 day logic maintained
+    
+    Known Issues (to fix in future):
+    - 10 DOMContentLoaded listeners (ควรรวมเป็น 1)
+    - 79 console.log statements (production cleanup)
+    - Duplicate helper functions (getTypeColor/3, etc.)
+    =============================================
+-->
 <html lang="th">
 <head>
     <meta charset="UTF-8">
@@ -3753,11 +3769,11 @@
         // เมื่อเลือกวันที่ใหม่ ให้ลบ 1 วัน
         dateInput.addEventListener('change', function() {
             if (this.value) {
-                var selectedDate = new Date(this.value);
+                const selectedDate = new Date(this.value);
                 selectedDate.setDate(selectedDate.getDate() - 1);
-                var newYear = selectedDate.getFullYear();
-                var newMonth = String(selectedDate.getMonth() + 1).padStart(2, '0');
-                var newDay = String(selectedDate.getDate()).padStart(2, '0');
+                const newYear = selectedDate.getFullYear();
+                const newMonth = String(selectedDate.getMonth() + 1).padStart(2, '0');
+                const newDay = String(selectedDate.getDate()).padStart(2, '0');
                 this.value = `${newYear}-${newMonth}-${newDay}`;
             }
         });
@@ -3971,16 +3987,11 @@
             await captureScreen('gauge');
         });
 
-        // ปิด modal เมื่อคลิกนอก content สำหรับ gauge
+        // ปิด modal และ window เมื่อคลิกนอก content สำหรับ gauge (รวม handlers)
         gaugeModal.addEventListener('click', function(e) {
             if (e.target === gaugeModal) {
                 gaugeModal.style.display = 'none';
-            }
-        });
-
-        // ปิด window ที่เปิดไว้เมื่อปิด gauge modal
-        gaugeModal.addEventListener('click', function(e) {
-            if (e.target === gaugeModal || e.target === closeGaugeBtn) {
+                // ปิด window ที่เปิดไว้ด้วย
                 if (gaugeOpenedWindow && !gaugeOpenedWindow.closed) {
                     gaugeOpenedWindow.close();
                 }
@@ -4451,34 +4462,52 @@
         }
 
         // Add IOW row
-        document.getElementById('addIOW').addEventListener('click', function() {
-            addRowForType('IOW');
-        });
+        const addIOWBtn = document.getElementById('addIOW');
+        if (addIOWBtn) {
+            addIOWBtn.addEventListener('click', function() {
+                addRowForType('IOW');
+            });
+        }
 
         // Remove IOW row
-        document.getElementById('removeIOW').addEventListener('click', function() {
-            removeRowForType('IOW');
-        });
+        const removeIOWBtn = document.getElementById('removeIOW');
+        if (removeIOWBtn) {
+            removeIOWBtn.addEventListener('click', function() {
+                removeRowForType('IOW');
+            });
+        }
 
         // Add SOW row
-        document.getElementById('addSOW').addEventListener('click', function() {
-            addRowForType('SOW');
-        });
+        const addSOWBtn = document.getElementById('addSOW');
+        if (addSOWBtn) {
+            addSOWBtn.addEventListener('click', function() {
+                addRowForType('SOW');
+            });
+        }
 
         // Remove SOW row
-        document.getElementById('removeSOW').addEventListener('click', function() {
-            removeRowForType('SOW');
-        });
+        const removeSOWBtn = document.getElementById('removeSOW');
+        if (removeSOWBtn) {
+            removeSOWBtn.addEventListener('click', function() {
+                removeRowForType('SOW');
+            });
+        }
 
         // Add ROW row
-        document.getElementById('addROW').addEventListener('click', function() {
-            addRowForType('ROW');
-        });
+        const addROWBtn = document.getElementById('addROW');
+        if (addROWBtn) {
+            addROWBtn.addEventListener('click', function() {
+                addRowForType('ROW');
+            });
+        }
 
         // Remove ROW row
-        document.getElementById('removeROW').addEventListener('click', function() {
-            removeRowForType('ROW');
-        });
+        const removeROWBtn = document.getElementById('removeROW');
+        if (removeROWBtn) {
+            removeROWBtn.addEventListener('click', function() {
+                removeRowForType('ROW');
+            });
+        }
 
         // Confirm and convert table to image
         if (confirmTableBtn) {
@@ -4675,7 +4704,7 @@
     <script>
         // ===== Toggle Sidebar =====
         function toggleSidebar() {
-            var sidebar = document.getElementById('sidebar');
+            const sidebar = document.getElementById('sidebar');
             if (sidebar) {
                 sidebar.classList.toggle('expanded');
             }
@@ -5706,11 +5735,11 @@
                 // เมื่อเลือกวันที่ใหม่ ให้ลบ 1 วัน
                 dateInput3.addEventListener('change', function() {
                     if (this.value) {
-                        var selectedDate = new Date(this.value);
+                        const selectedDate = new Date(this.value);
                         selectedDate.setDate(selectedDate.getDate() - 1);
-                        var newYear = selectedDate.getFullYear();
-                        var newMonth = String(selectedDate.getMonth() + 1).padStart(2, '0');
-                        var newDay = String(selectedDate.getDate()).padStart(2, '0');
+                        const newYear = selectedDate.getFullYear();
+                        const newMonth = String(selectedDate.getMonth() + 1).padStart(2, '0');
+                        const newDay = String(selectedDate.getDate()).padStart(2, '0');
                         this.value = `${newYear}-${newMonth}-${newDay}`;
                     }
                 });
@@ -6366,34 +6395,52 @@
             }
 
             // Add IOW row
-            document.getElementById('addIOW3').addEventListener('click', function() {
-                addRowForType3('IOW');
-            });
+            const addIOW3Btn = document.getElementById('addIOW3');
+            if (addIOW3Btn) {
+                addIOW3Btn.addEventListener('click', function() {
+                    addRowForType3('IOW');
+                });
+            }
 
             // Remove IOW row
-            document.getElementById('removeIOW3').addEventListener('click', function() {
-                removeRowForType3('IOW');
-            });
+            const removeIOW3Btn = document.getElementById('removeIOW3');
+            if (removeIOW3Btn) {
+                removeIOW3Btn.addEventListener('click', function() {
+                    removeRowForType3('IOW');
+                });
+            }
 
             // Add SOW row
-            document.getElementById('addSOW3').addEventListener('click', function() {
-                addRowForType3('SOW');
-            });
+            const addSOW3Btn = document.getElementById('addSOW3');
+            if (addSOW3Btn) {
+                addSOW3Btn.addEventListener('click', function() {
+                    addRowForType3('SOW');
+                });
+            }
 
             // Remove SOW row
-            document.getElementById('removeSOW3').addEventListener('click', function() {
-                removeRowForType3('SOW');
-            });
+            const removeSOW3Btn = document.getElementById('removeSOW3');
+            if (removeSOW3Btn) {
+                removeSOW3Btn.addEventListener('click', function() {
+                    removeRowForType3('SOW');
+                });
+            }
 
             // Add ROW row
-            document.getElementById('addROW3').addEventListener('click', function() {
-                addRowForType3('ROW');
-            });
+            const addROW3Btn = document.getElementById('addROW3');
+            if (addROW3Btn) {
+                addROW3Btn.addEventListener('click', function() {
+                    addRowForType3('ROW');
+                });
+            }
 
             // Remove ROW row
-            document.getElementById('removeROW3').addEventListener('click', function() {
-                removeRowForType3('ROW');
-            });
+            const removeROW3Btn = document.getElementById('removeROW3');
+            if (removeROW3Btn) {
+                removeROW3Btn.addEventListener('click', function() {
+                    removeRowForType3('ROW');
+                });
+            }
 
             // Confirm and convert table to image for gaugeCard8
             if (confirmTableBtn3) {
