@@ -1,20 +1,33 @@
 <!DOCTYPE html>
 <!--
     =============================================
-    Dashboard v36 - Code Cleanup & Bug Fixes
+    Dashboard v37 - Water API Auto-Update & Date Fix
     =============================================
-    Changelog v36:
+    Changelog v37:
+    - ปริมาณน้ำที่ใช้ได้: Auto-update จาก API ทุกวันเวลา 12:00
+    - เพิ่มช่องกรอก ปริมาณน้ำในอ่าง (ซ่อนไว้) คลิกที่ label "ปริมาณน้ำที่ใช้ได้" เพื่อเปิด/ปิด
+    - Container 2 วันที่: เปลี่ยนจาก -1 วัน เป็นวันปัจจุบัน
+    - Initial auto-fetch เมื่อโหลดหน้า (ถ้าข้อมูลเป็น default)
+    
+    From v36:
     - รวม gaugeModal duplicate click handlers (2→1)
     - แก้ var เป็น const ใน dateInput handlers  
     - เพิ่ม null checks สำหรับ IOW/SOW/ROW buttons
-    - Container 2 & 3: date -1 day logic maintained
     - เพิ่ม Top Alarm Description textbox (topAlarmDesc1, topAlarmDesc3)
     - Auto-resize สำหรับ description input (min-width: 200px)
     - อัพเดต save/load/clear functions รองรับ topAlarmDesc
     
+    Auto Save System:
+    - ปุ่ม Auto Save ใน sidebar
+    - ตั้งช่วงเวลาทำงาน (เช่น 01:00-06:00)
+    - ตั้งความถี่ (1, 5, 10, 15, 30, 60 นาที)
+    - Countdown แสดงเวลาถัดไป
+    - Auto-restart เมื่อ refresh หน้าเว็บ
+    - บันทึกการตั้งค่าใน localStorage
+    
     Known Issues (to fix in future):
     - 10 DOMContentLoaded listeners (ควรรวมเป็น 1)
-    - 79 console.log statements (production cleanup)
+    - console.log statements (production cleanup)
     - Duplicate helper functions (getTypeColor/3, etc.)
     =============================================
 -->
@@ -195,6 +208,222 @@
             height: 1px;
             background: rgba(255,255,255,0.1);
             margin: 12px 10px;
+        }
+
+        /* Auto Save Panel in Sidebar */
+        .auto-save-panel {
+            padding: 10px;
+            margin-top: auto;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .auto-save-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px;
+            background: rgba(46, 204, 113, 0.2);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .auto-save-toggle:hover {
+            background: rgba(46, 204, 113, 0.3);
+        }
+
+        .auto-save-toggle.active {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            box-shadow: 0 3px 10px rgba(46, 204, 113, 0.4);
+        }
+
+        .auto-save-toggle .icon {
+            font-size: 1.3rem;
+        }
+
+        .auto-save-toggle .text {
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: none;
+        }
+
+        .sidebar.expanded .auto-save-toggle .text {
+            display: inline;
+        }
+
+        .auto-save-status {
+            text-align: center;
+            padding: 8px;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.7);
+            display: none;
+        }
+
+        .sidebar.expanded .auto-save-status {
+            display: block;
+        }
+
+        .auto-save-status.running {
+            color: #2ecc71;
+        }
+
+        .auto-save-countdown {
+            font-weight: bold;
+            color: #4facfe;
+        }
+
+        /* Auto Save Settings Modal */
+        .auto-save-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+        }
+
+        .auto-save-modal.show {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .auto-save-modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .auto-save-modal-header {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .auto-save-modal-header h3 {
+            margin: 0;
+            font-size: 1.3rem;
+        }
+
+        .auto-save-modal-body {
+            padding: 25px;
+        }
+
+        .auto-save-form-group {
+            margin-bottom: 20px;
+        }
+
+        .auto-save-form-group label {
+            display: block;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .auto-save-form-group .hint {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        .auto-save-time-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .auto-save-time-row input[type="time"] {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .auto-save-time-row input[type="time"]:focus {
+            outline: none;
+            border-color: #2ecc71;
+        }
+
+        .auto-save-time-row span {
+            color: #7f8c8d;
+            font-weight: bold;
+        }
+
+        .auto-save-interval-select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .auto-save-interval-select:focus {
+            outline: none;
+            border-color: #2ecc71;
+        }
+
+        .auto-save-modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+        }
+
+        .auto-save-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .auto-save-btn-primary {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+        }
+
+        .auto-save-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+        }
+
+        .auto-save-btn-secondary {
+            background: #ecf0f1;
+            color: #2c3e50;
+        }
+
+        .auto-save-btn-secondary:hover {
+            background: #ddd;
+        }
+
+        .auto-save-btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .auto-save-btn-danger:hover {
+            background: #c0392b;
         }
 
         /* Main Content Area */
@@ -1582,7 +1811,64 @@
                 </a>
             </li>
         </ul>
+        
+        <!-- Auto Save Panel -->
+        <div class="auto-save-panel">
+            <div class="auto-save-toggle" id="autoSaveToggle" onclick="toggleAutoSaveModal()">
+                <span class="icon">⏰</span>
+                <span class="text">Auto Save</span>
+            </div>
+            <div class="auto-save-status" id="autoSaveStatus">
+                <span id="autoSaveStatusText">ปิดอยู่</span>
+            </div>
+        </div>
     </nav>
+
+    <!-- Auto Save Settings Modal -->
+    <div class="auto-save-modal" id="autoSaveModal">
+        <div class="auto-save-modal-content">
+            <div class="auto-save-modal-header">
+                <h3>⏰ ตั้งค่า Auto Save</h3>
+                <button class="btn btn-close" onclick="closeAutoSaveModal()">✖</button>
+            </div>
+            <div class="auto-save-modal-body">
+                <div class="auto-save-form-group">
+                    <label>🕐 ช่วงเวลาทำงาน</label>
+                    <div class="auto-save-time-row">
+                        <input type="time" id="autoSaveStartTime" value="01:00">
+                        <span>ถึง</span>
+                        <input type="time" id="autoSaveEndTime" value="06:00">
+                    </div>
+                    <div class="hint">ระบบจะบันทึกอัตโนมัติเฉพาะในช่วงเวลานี้</div>
+                </div>
+                
+                <div class="auto-save-form-group">
+                    <label>⏱️ ความถี่การบันทึก</label>
+                    <select class="auto-save-interval-select" id="autoSaveInterval">
+                        <option value="1">ทุก 1 นาที</option>
+                        <option value="5">ทุก 5 นาที</option>
+                        <option value="10">ทุก 10 นาที</option>
+                        <option value="15" selected>ทุก 15 นาที</option>
+                        <option value="30">ทุก 30 นาที</option>
+                        <option value="60">ทุก 1 ชั่วโมง</option>
+                    </select>
+                </div>
+                
+                <div class="auto-save-form-group">
+                    <label>📋 สถานะปัจจุบัน</label>
+                    <div id="autoSaveCurrentStatus" style="padding: 15px; background: #f8f9fa; border-radius: 10px; font-size: 0.9rem;">
+                        <div>🔴 Auto Save: <strong>ปิดอยู่</strong></div>
+                        <div style="margin-top: 8px; color: #7f8c8d;">บันทึกครั้งล่าสุด: -</div>
+                    </div>
+                </div>
+            </div>
+            <div class="auto-save-modal-footer">
+                <button class="auto-save-btn auto-save-btn-secondary" onclick="closeAutoSaveModal()">ปิด</button>
+                <button class="auto-save-btn auto-save-btn-danger" id="autoSaveStopBtn" onclick="stopAutoSave()" style="display: none;">⏹️ หยุด</button>
+                <button class="auto-save-btn auto-save-btn-primary" id="autoSaveStartBtn" onclick="startAutoSave()">▶️ เริ่มทำงาน</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Main Content Wrapper -->
     <div class="main-wrapper">
@@ -1621,16 +1907,16 @@
                 </div>
 
                 <div class="water-volume-input" style="display: flex; align-items: center; gap: 10px;">
-                    <label for="waterVolume">ปริมาณน้ำที่ใช้ได้ (ล้าน ลบ.ม.) :</label>
+                    <label for="waterVolume" id="waterVolumeLabel" style="cursor: pointer;" title="คลิกเพื่อแสดง/ซ่อนช่องกรอกปริมาณน้ำในอ่าง">ปริมาณน้ำที่ใช้ได้ (ล้าน ลบ.ม.) :</label>
                     <input type="text" id="waterVolume" placeholder="กรอกปริมาณน้ำ" value="150.97 (100.48%)">
                     <!-- ปุ่ม toggle ซ่อนไว้ -->
                     <span id="toggleGaugeBtn" style="display: none; font-size: 1.5em; cursor: pointer; color: #3498db; user-select: none;">▼</span>
                     <button id="fetchDataBtn" style="padding: 8px 10px; font-size: 20px; background: #95a5a6; color: white; border: none; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; line-height: 1;" title="ดึงข้อมูลจากกรมชลประทาน">🔄</button>
                 </div>
 
-                <!-- ซ่อนบรรทัดปริมาณน้ำใช้การ แต่ยังเก็บ element ไว้สำหรับเก็บค่า -->
+                <!-- ซ่อนบรรทัดปริมาณน้ำในอ่าง แต่ยังเก็บ element ไว้สำหรับเก็บค่า - คลิกที่ label ด้านบนเพื่อเปิด -->
                 <div class="water-volume-input" id="waterUseRow" style="display: none; align-items: center; gap: 10px;">
-                    <label for="waterUse" style="font-size: 18px;">ปริมาณน้ำใช้การ (ล้านลบ.ม.) :</label>
+                    <label for="waterUse" style="font-size: 18px;">ปริมาณน้ำในอ่าง (ล้านลบ.ม.) :</label>
                     <input type="text" id="waterUse" placeholder="กรอกปริมาณน้ำ" value="139.74 (93.00%)" style="width: 180px; font-size: 18px; padding: 6px;">
                 </div>
 
@@ -3791,27 +4077,13 @@
         alarmResult.textContent = initialResult;
         updateLegendCheckmark(parseFloat(initialResult), 2);
 
-        // ตั้งค่าวันที่เป็นเมื่อวาน (-1 วัน)
+        // ตั้งค่าวันที่เป็นวันปัจจุบัน
         const dateInput = document.getElementById('dateInput');
         const today = new Date();
-        const yesterday = new Date(today);
-        yesterday.setDate(yesterday.getDate() - 1);
-        const year = yesterday.getFullYear();
-        const month = String(yesterday.getMonth() + 1).padStart(2, '0');
-        const day = String(yesterday.getDate()).padStart(2, '0');
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
         dateInput.value = `${year}-${month}-${day}`;
-        
-        // เมื่อเลือกวันที่ใหม่ ให้ลบ 1 วัน
-        dateInput.addEventListener('change', function() {
-            if (this.value) {
-                const selectedDate = new Date(this.value);
-                selectedDate.setDate(selectedDate.getDate() - 1);
-                const newYear = selectedDate.getFullYear();
-                const newMonth = String(selectedDate.getMonth() + 1).padStart(2, '0');
-                const newDay = String(selectedDate.getDate()).padStart(2, '0');
-                this.value = `${newYear}-${newMonth}-${newDay}`;
-            }
-        });
 
         // ฟังก์ชันวาด Gauge Chart
         function drawGaugeChart(canvasId, percentage) {
@@ -5561,6 +5833,46 @@
                     });
                 }
 
+                // =============================================
+                // ⏰ AUTO FETCH DATA AT 12:00 DAILY
+                // =============================================
+                (function setupAutoFetchAt12() {
+                    let lastFetchDate = null;
+                    
+                    function checkAndFetch() {
+                        const now = new Date();
+                        const hours = now.getHours();
+                        const minutes = now.getMinutes();
+                        const todayStr = now.toDateString();
+                        
+                        // ตรวจสอบว่าเป็นเวลา 12:00 และยังไม่ได้ fetch วันนี้
+                        if (hours === 12 && minutes === 0 && lastFetchDate !== todayStr) {
+                            lastFetchDate = todayStr;
+                            console.log('⏰ Auto-fetch at 12:00 -', now.toLocaleString('th-TH'));
+                            if (typeof window.fetchRIDData === 'function') {
+                                window.fetchRIDData();
+                            }
+                        }
+                    }
+                    
+                    // ตรวจสอบทุก 30 วินาที
+                    setInterval(checkAndFetch, 30000);
+                    
+                    // Fetch ครั้งแรกเมื่อโหลดหน้า (ถ้ายังไม่มีข้อมูล)
+                    setTimeout(function() {
+                        const waterVolumeInput = document.getElementById('waterVolume');
+                        // ถ้าค่าเป็น default หรือว่างเปล่า ให้ fetch ทันที
+                        if (waterVolumeInput && (waterVolumeInput.value === '150.97 (100.48%)' || !waterVolumeInput.value)) {
+                            console.log('🚀 Initial auto-fetch on page load');
+                            if (typeof window.fetchRIDData === 'function') {
+                                window.fetchRIDData();
+                            }
+                        }
+                    }, 2000);
+                    
+                    console.log('⏰ Auto-fetch scheduled for 12:00 daily');
+                })();
+
                 // ฟังก์ชันดึงค่า % จาก textbox
                 function parsePercentFromInput(text) {
                     if (!text || typeof text !== 'string') return null;
@@ -5673,20 +5985,30 @@
                 
                 // (ลบ event listeners ซ้ำซ้อน - ย้ายไปอยู่ใน convertToColoredInput แล้ว)
 
-                // Toggle button สำหรับซ่อน/แสดง ปริมาณน้ำใช้การ
+                // Toggle button สำหรับซ่อน/แสดง ปริมาณน้ำในอ่าง
                 var toggleBtn = document.getElementById('toggleGaugeBtn');
                 var waterUseRow = document.getElementById('waterUseRow');
+                var waterVolumeLabel = document.getElementById('waterVolumeLabel');
+                
+                // ฟังก์ชัน toggle สำหรับ waterUseRow
+                function toggleWaterUseRow() {
+                    if (!waterUseRow) return;
+                    if (waterUseRow.style.display === 'none') {
+                        waterUseRow.style.display = 'flex';
+                        if (toggleBtn) toggleBtn.textContent = '▲';
+                    } else {
+                        waterUseRow.style.display = 'none';
+                        if (toggleBtn) toggleBtn.textContent = '▼';
+                    }
+                }
+                
+                // เพิ่ม click event ที่ label "ปริมาณน้ำที่ใช้ได้"
+                if (waterVolumeLabel && waterUseRow) {
+                    waterVolumeLabel.addEventListener('click', toggleWaterUseRow);
+                }
                 
                 if (toggleBtn && waterUseRow) {
-                    toggleBtn.addEventListener('click', function() {
-                        if (waterUseRow.style.display === 'none') {
-                            waterUseRow.style.display = 'flex';
-                            toggleBtn.textContent = '▲';
-                        } else {
-                            waterUseRow.style.display = 'none';
-                            toggleBtn.textContent = '▼';
-                        }
-                    });
+                    toggleBtn.addEventListener('click', toggleWaterUseRow);
                 }
 
                 // ปิดฟังก์ชันคลิกเพื่อเปิดลิงค์ของเกจฝั่งขวา
@@ -7136,6 +7458,342 @@
             console.log('🔥 Firebase Realtime Database initialized');
             console.log('📌 Commands: clearDashboardData(), saveDashboardData(), reloadDashboardData()');
         }
+    </script>
+
+    <!-- =============================================
+         ⏰ AUTO SAVE SYSTEM
+         ============================================= -->
+    <script>
+        // =============================================
+        // Auto Save Configuration & State
+        // =============================================
+        const AutoSave = {
+            isRunning: false,
+            intervalId: null,
+            countdownId: null,
+            lastSaveTime: null,
+            nextSaveTime: null,
+            
+            // Default settings
+            settings: {
+                startTime: '01:00',
+                endTime: '06:00',
+                intervalMinutes: 15
+            },
+            
+            // Load settings from localStorage
+            loadSettings: function() {
+                try {
+                    const saved = localStorage.getItem('autoSaveSettings');
+                    if (saved) {
+                        this.settings = JSON.parse(saved);
+                    }
+                    
+                    // Also check if auto save was running
+                    const wasRunning = localStorage.getItem('autoSaveRunning') === 'true';
+                    if (wasRunning) {
+                        // Auto-restart if page was refreshed while running
+                        setTimeout(() => this.start(), 1000);
+                    }
+                } catch(e) {
+                    console.log('Could not load auto save settings');
+                }
+                
+                // Apply settings to UI
+                this.applySettingsToUI();
+            },
+            
+            // Save settings to localStorage
+            saveSettings: function() {
+                try {
+                    localStorage.setItem('autoSaveSettings', JSON.stringify(this.settings));
+                    localStorage.setItem('autoSaveRunning', this.isRunning.toString());
+                } catch(e) {
+                    console.log('Could not save auto save settings');
+                }
+            },
+            
+            // Apply settings to UI inputs
+            applySettingsToUI: function() {
+                const startInput = document.getElementById('autoSaveStartTime');
+                const endInput = document.getElementById('autoSaveEndTime');
+                const intervalSelect = document.getElementById('autoSaveInterval');
+                
+                if (startInput) startInput.value = this.settings.startTime;
+                if (endInput) endInput.value = this.settings.endTime;
+                if (intervalSelect) intervalSelect.value = this.settings.intervalMinutes.toString();
+            },
+            
+            // Read settings from UI
+            readSettingsFromUI: function() {
+                const startInput = document.getElementById('autoSaveStartTime');
+                const endInput = document.getElementById('autoSaveEndTime');
+                const intervalSelect = document.getElementById('autoSaveInterval');
+                
+                if (startInput) this.settings.startTime = startInput.value;
+                if (endInput) this.settings.endTime = endInput.value;
+                if (intervalSelect) this.settings.intervalMinutes = parseInt(intervalSelect.value);
+            },
+            
+            // Check if current time is within active hours
+            isWithinActiveHours: function() {
+                const now = new Date();
+                const currentMinutes = now.getHours() * 60 + now.getMinutes();
+                
+                const [startH, startM] = this.settings.startTime.split(':').map(Number);
+                const [endH, endM] = this.settings.endTime.split(':').map(Number);
+                
+                const startMinutes = startH * 60 + startM;
+                const endMinutes = endH * 60 + endM;
+                
+                // Handle overnight range (e.g., 22:00 - 06:00)
+                if (startMinutes > endMinutes) {
+                    return currentMinutes >= startMinutes || currentMinutes < endMinutes;
+                }
+                
+                return currentMinutes >= startMinutes && currentMinutes < endMinutes;
+            },
+            
+            // Perform save action
+            performSave: async function() {
+                if (!this.isWithinActiveHours()) {
+                    console.log('⏰ Auto Save: นอกช่วงเวลาทำงาน');
+                    this.updateStatus('นอกช่วงเวลา (' + this.settings.startTime + '-' + this.settings.endTime + ')');
+                    return;
+                }
+                
+                console.log('💾 Auto Save: กำลังบันทึก...');
+                this.updateStatus('กำลังบันทึก...');
+                
+                try {
+                    // Find visible save button and click it
+                    const container2 = document.getElementById('container2');
+                    const container3 = document.getElementById('container3');
+                    
+                    let saveBtn = null;
+                    
+                    if (container2 && container2.style.display !== 'none') {
+                        saveBtn = document.getElementById('saveBtnContainer2');
+                    } else if (container3 && container3.style.display !== 'none') {
+                        saveBtn = document.getElementById('saveBtn3');
+                    } else {
+                        saveBtn = document.getElementById('saveBtn');
+                    }
+                    
+                    if (saveBtn) {
+                        // Simulate click
+                        saveBtn.click();
+                        console.log('✅ Auto Save: คลิกปุ่มบันทึกแล้ว');
+                    } else {
+                        // Fallback to direct sync
+                        if (typeof window.syncToFirebase === 'function') {
+                            await window.syncToFirebase();
+                            console.log('✅ Auto Save: Sync ไป Firebase แล้ว');
+                        }
+                    }
+                    
+                    this.lastSaveTime = new Date();
+                    this.updateStatus('บันทึกแล้ว ✓');
+                    this.updateCurrentStatus();
+                    
+                } catch(error) {
+                    console.error('❌ Auto Save Error:', error);
+                    this.updateStatus('บันทึกไม่สำเร็จ!');
+                }
+            },
+            
+            // Start auto save
+            start: function() {
+                this.readSettingsFromUI();
+                this.saveSettings();
+                
+                if (this.isRunning) {
+                    console.log('⚠️ Auto Save already running');
+                    return;
+                }
+                
+                this.isRunning = true;
+                this.saveSettings();
+                
+                const intervalMs = this.settings.intervalMinutes * 60 * 1000;
+                
+                // Perform first save immediately if within active hours
+                if (this.isWithinActiveHours()) {
+                    this.performSave();
+                }
+                
+                // Set up interval
+                this.intervalId = setInterval(() => {
+                    this.performSave();
+                }, intervalMs);
+                
+                // Start countdown display
+                this.startCountdown();
+                
+                // Update UI
+                this.updateToggleButton(true);
+                this.updateModalButtons(true);
+                this.updateCurrentStatus();
+                
+                console.log('▶️ Auto Save Started');
+                console.log('   ช่วงเวลา:', this.settings.startTime, '-', this.settings.endTime);
+                console.log('   ทุก:', this.settings.intervalMinutes, 'นาที');
+            },
+            
+            // Stop auto save
+            stop: function() {
+                this.isRunning = false;
+                this.saveSettings();
+                
+                if (this.intervalId) {
+                    clearInterval(this.intervalId);
+                    this.intervalId = null;
+                }
+                
+                if (this.countdownId) {
+                    clearInterval(this.countdownId);
+                    this.countdownId = null;
+                }
+                
+                // Update UI
+                this.updateToggleButton(false);
+                this.updateModalButtons(false);
+                this.updateStatus('ปิดอยู่');
+                this.updateCurrentStatus();
+                
+                console.log('⏹️ Auto Save Stopped');
+            },
+            
+            // Start countdown display
+            startCountdown: function() {
+                if (this.countdownId) {
+                    clearInterval(this.countdownId);
+                }
+                
+                const updateCountdown = () => {
+                    if (!this.isRunning) return;
+                    
+                    const now = new Date();
+                    const intervalMs = this.settings.intervalMinutes * 60 * 1000;
+                    const elapsed = this.lastSaveTime ? (now - this.lastSaveTime) : 0;
+                    const remaining = Math.max(0, intervalMs - elapsed);
+                    
+                    const mins = Math.floor(remaining / 60000);
+                    const secs = Math.floor((remaining % 60000) / 1000);
+                    
+                    if (this.isWithinActiveHours()) {
+                        this.updateStatus(`ถัดไป: ${mins}:${secs.toString().padStart(2, '0')}`);
+                    } else {
+                        this.updateStatus(`รอเวลา ${this.settings.startTime}`);
+                    }
+                };
+                
+                updateCountdown();
+                this.countdownId = setInterval(updateCountdown, 1000);
+            },
+            
+            // Update sidebar status text
+            updateStatus: function(text) {
+                const statusEl = document.getElementById('autoSaveStatusText');
+                if (statusEl) {
+                    statusEl.textContent = text;
+                }
+                
+                const statusContainer = document.getElementById('autoSaveStatus');
+                if (statusContainer) {
+                    statusContainer.classList.toggle('running', this.isRunning);
+                }
+            },
+            
+            // Update toggle button appearance
+            updateToggleButton: function(isActive) {
+                const toggle = document.getElementById('autoSaveToggle');
+                if (toggle) {
+                    toggle.classList.toggle('active', isActive);
+                }
+            },
+            
+            // Update modal buttons
+            updateModalButtons: function(isRunning) {
+                const startBtn = document.getElementById('autoSaveStartBtn');
+                const stopBtn = document.getElementById('autoSaveStopBtn');
+                
+                if (startBtn) startBtn.style.display = isRunning ? 'none' : 'block';
+                if (stopBtn) stopBtn.style.display = isRunning ? 'block' : 'none';
+            },
+            
+            // Update current status in modal
+            updateCurrentStatus: function() {
+                const statusEl = document.getElementById('autoSaveCurrentStatus');
+                if (!statusEl) return;
+                
+                const statusIcon = this.isRunning ? '🟢' : '🔴';
+                const statusText = this.isRunning ? 'ทำงานอยู่' : 'ปิดอยู่';
+                const lastSave = this.lastSaveTime 
+                    ? this.lastSaveTime.toLocaleTimeString('th-TH')
+                    : '-';
+                
+                let activeStatus = '';
+                if (this.isRunning) {
+                    activeStatus = this.isWithinActiveHours() 
+                        ? '<span style="color: #2ecc71;">● อยู่ในช่วงเวลาทำงาน</span>'
+                        : '<span style="color: #f39c12;">● รอช่วงเวลาทำงาน</span>';
+                }
+                
+                statusEl.innerHTML = `
+                    <div>${statusIcon} Auto Save: <strong>${statusText}</strong></div>
+                    <div style="margin-top: 8px; color: #7f8c8d;">บันทึกครั้งล่าสุด: ${lastSave}</div>
+                    ${activeStatus ? '<div style="margin-top: 8px;">' + activeStatus + '</div>' : ''}
+                `;
+            }
+        };
+        
+        // =============================================
+        // Global Functions for UI
+        // =============================================
+        function toggleAutoSaveModal() {
+            const modal = document.getElementById('autoSaveModal');
+            if (modal) {
+                modal.classList.add('show');
+                AutoSave.updateCurrentStatus();
+            }
+        }
+        
+        function closeAutoSaveModal() {
+            const modal = document.getElementById('autoSaveModal');
+            if (modal) {
+                modal.classList.remove('show');
+            }
+        }
+        
+        function startAutoSave() {
+            AutoSave.start();
+        }
+        
+        function stopAutoSave() {
+            AutoSave.stop();
+        }
+        
+        // Close modal when clicking outside
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('autoSaveModal');
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        closeAutoSaveModal();
+                    }
+                });
+            }
+            
+            // Load saved settings
+            AutoSave.loadSettings();
+        });
+        
+        // Make AutoSave available globally
+        window.AutoSave = AutoSave;
+        
+        console.log('⏰ Auto Save System loaded');
+        console.log('📌 Commands: AutoSave.start(), AutoSave.stop()');
     </script>
 
     </div><!-- End main-wrapper -->
