@@ -5719,22 +5719,25 @@
                             // ดึงข้อมูลเรคคอร์ดล่าสุด (วันที่ล่าสุด)
                             const latest = data.dam_data[data.dam_data.length - 1];
                             
-                            // 1. ปริมาณน้ำใช้การ (ล้าน ลบ.ม.) -> VAL_DMD_Q_curr (เช่น 72.22)
+                            // 1. ปริมาณน้ำใช้การ (ล้าน ลบ.ม.) -> VAL_DMD_Q_curr (เช่น 71.01)
                             const valUsable = parseFloat(latest.VAL_DMD_Q_curr || 0).toFixed(2);
                             
-                            // 2. ระดับน้ำในอ่าง (ม.รทก.) -> DMD_ULevel_curr (เช่น 40.90)
-                            const uLevel = parseFloat(latest.DMD_ULevel_curr || 0).toFixed(2);
-                            
-                            // 3. ปริมาณน้ำในอ่าง (ล้าน ลบ.ม.) -> DMD_QUse_curr (เช่น 85.72)
+                            // 2. ปริมาณน้ำในอ่าง (ล้าน ลบ.ม.) -> DMD_QUse_curr (เช่น 84.51)
                             const qUse = parseFloat(latest.DMD_QUse_curr || 0).toFixed(2);
                             
-                            // 4. ในอ่างเก็บน้ำ (% รนก.) -> PERCENT_DMD_QUse_curr (เช่น 52.35)
+                            // 3. ในอ่างเก็บน้ำ (% รนก.) -> PERCENT_DMD_QUse_curr (เช่น 51.61)
                             const percentRnk = parseFloat(latest.PERCENT_DMD_QUse_curr || 0).toFixed(2);
                             
-                            // ข้อความสำหรับช่อง "ปริมาณน้ำที่ใช้ได้ (ล้าน ลบ.ม.) :" -> 72.22 (40.90%)
-                            const usableText = `${valUsable} (${uLevel}%)`;
+                            // 4. % ปริมาณน้ำใช้การ (% รนก. ใช้การ) -> (VAL_DMD_Q_curr / DAM_QUsage) * 100 (เช่น 47.26%)
+                            const damQUsage = parseFloat(latest.DAM_QUsage || 150.25);
+                            const percentUsable = damQUsage > 0 
+                                ? ((parseFloat(latest.VAL_DMD_Q_curr || 0) / damQUsage) * 100).toFixed(2)
+                                : '0.00';
                             
-                            // ข้อความสำหรับช่อง "ปริมาณน้ำในอ่าง (ล้านลบ.ม.) :" -> 85.72 (52.35%)
+                            // ข้อความสำหรับช่อง "ปริมาณน้ำที่ใช้ได้ (ล้าน ลบ.ม.) :" -> 71.01 (47.26%)
+                            const usableText = `${valUsable} (${percentUsable}%)`;
+                            
+                            // ข้อความสำหรับช่อง "ปริมาณน้ำในอ่าง (ล้านลบ.ม.) :" -> 84.51 (51.61%)
                             const volumeText = `${qUse} (${percentRnk}%)`;
                             
                             // อัปเดตช่อง "ปริมาณน้ำที่ใช้ได้ (ล้าน ลบ.ม.) :"
@@ -5758,9 +5761,9 @@
                                 }
                             }
                             
-                            // อัปเดตกราฟวงกลมและบาร์กราฟที่ 1 (ใช้ % จากระดับน้ำในอ่าง uLevel = 40.90)
+                            // อัปเดตกราฟวงกลมและบาร์กราฟที่ 1 (ใช้ % ปริมาณน้ำใช้การ percentUsable = 47.26%)
                             if (typeof window.updateNewGauge === 'function') {
-                                window.updateNewGauge(parseFloat(uLevel), usableText);
+                                window.updateNewGauge(parseFloat(percentUsable), usableText);
                             }
                             
                             // อัปเดตบาร์กราฟที่ 2
